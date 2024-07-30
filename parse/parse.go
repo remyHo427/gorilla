@@ -187,7 +187,7 @@ func (p *Parser) parseAssign(left Expr) Expr {
 	}
 	p.adv()
 
-	if value := p.parseExpr(LOWEST); value == nil {
+	if value := p.parseExpr(ASSIGN); value == nil {
 		return nil
 	} else {
 		expr.Value = value

@@ -34,7 +34,7 @@ type InfixExpr struct {
 
 func (e *InfixExpr) exprNode() {}
 func (e *InfixExpr) String() string {
-	return join(e.Type, e.Left, e.Right)
+	return join(e.Left, e.Type, e.Right)
 }
 
 type AssignExpr struct {
@@ -45,7 +45,7 @@ type AssignExpr struct {
 
 func (e *AssignExpr) exprNode() {}
 func (e *AssignExpr) String() string {
-	return join(e.Type, e.Expr, e.Value)
+	return join(e.Expr, e.Type, e.Value)
 }
 
 type PrefixExpr struct {
