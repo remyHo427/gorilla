@@ -76,9 +76,6 @@ func (l *Lexer) Lex() Token {
 		case ':':
 			l.adv()
 			return tok(COLON)
-		case '.':
-			l.adv()
-			return tok(DOT)
 		case '{':
 			l.adv()
 			return tok(LBRACE)
@@ -103,6 +100,11 @@ func (l *Lexer) Lex() Token {
 		case '~':
 			l.adv()
 			return tok(BCOMP)
+		case '.':
+			l.adv()
+			ttype = l.match("..", ELLIP, ttype)
+			ttype = l.match("", DOT, ttype)
+			return tok(ttype)
 		case '+':
 			l.adv()
 			ttype = l.match("+", INC, ttype)
@@ -113,6 +115,7 @@ func (l *Lexer) Lex() Token {
 			l.adv()
 			ttype = l.match("-", DEC, ttype)
 			ttype = l.match("=", SUB_ASSIGN, ttype)
+			ttype = l.match(">", ARROW, ttype)
 			ttype = l.match("", SUB, ttype)
 			return tok(ttype)
 		case '*':

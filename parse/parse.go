@@ -29,7 +29,7 @@ const (
 	GROUP
 )
 
-var prec = []uint{
+var prec = map[uint]uint{
 	lex.ASSIGN:     ASSIGN,
 	lex.MUL_ASSIGN: ASSIGN,
 	lex.ADD_ASSIGN: ASSIGN,
