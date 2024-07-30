@@ -1,0 +1,98 @@
+package lex
+
+const (
+	EOF = iota
+	ERR
+	// keywords
+	AUTO
+	BREAK
+	CASE
+	CHAR
+	CONST
+	CONTINUE
+	DEFAULT
+	DO
+	DOUBLE
+	ELSE
+	ENUM
+	EXTERN
+	FLOAT
+	FOR
+	GOTO
+	IF
+	INT
+	LONG
+	REGISTER
+	RETURN
+	SHORT
+	SIGNED
+	SIZEOF
+	STATIC
+	STRUCT
+	SWITCH
+	TYPEDEF
+	UNION
+	UNSIGNED
+	VOID
+	VOLATILE
+	WHILE
+	// operator
+	INC
+	DEC
+	LSHIFT
+	RSHIFT
+	LT
+	GT
+	LEQ
+	GEQ
+	EQ
+	NEQ
+	BAND
+	BOR
+	MUL
+	DIV
+	MOD
+	ADD
+	SUB
+	AND
+	OR
+	XOR
+	NOT
+	ASSIGN
+	// assign operator
+	MUL_ASSIGN
+	DIV_ASSIGN
+	MOD_ASSIGN
+	ADD_ASSIGN
+	SUB_ASSIGN
+	RS_ASSIGN
+	LS_ASSIGN
+	BA_ASSIGN
+	XO_ASSIGN
+	BO_ASSIGN
+	// punctuators
+	QMARK
+	SCOLON
+	COLON
+	DOT
+	LBRACE
+	RBRACE
+	LPAREN
+	RPAREN
+	LBRACKET
+	RBRACKET
+	COMMA
+	// misc
+	IDENT
+	CHAR_CONST
+	STRING
+	INT_CONST
+	FLOAT_CONST
+)
+
+type Token struct {
+	Type    uint
+	Col     uint
+	Line    uint
+	Literal string
+}
