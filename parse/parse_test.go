@@ -29,7 +29,19 @@ func TestAssign(t *testing.T) {
 func TestPrefixOpt(t *testing.T) {
 	tt := []Pair{
 		{"!true;", "(! true)"},
-		// todo! expand tests to all assign operators
+		{"++a;", "(++ a)"},
+		{"--a;", "(-- a)"},
+		{"+a;", "(+ a)"},
+		{"-a;", "(- a)"},
+		{"&a;", "(& a)"},
+		{"~a;", "(~ a)"},
+	}
+	check(t, tt)
+}
+
+func TestPostfixOpt(t *testing.T) {
+	tt := []Pair{
+		{"a++;", "(a ++)"},
 	}
 	check(t, tt)
 }
@@ -41,8 +53,9 @@ func TestTernary(t *testing.T) {
 	check(t, tt)
 }
 
-func TestInfixPrecedence(t *testing.T) {
+func TestPrecedence(t *testing.T) {
 	tt := []Pair{
+		{"a.b++;", "((. a b) ++)"},
 		// {"1 + a();", "(+ 1 (a ))"},
 		{"1 + 1 * 1;", "(+ 1 (* 1 1))"},
 		{"1 + 1 / 1;", "(+ 1 (/ 1 1))"},
@@ -71,6 +84,8 @@ func TestInfixPrecedence(t *testing.T) {
 		{"a <<= b ? c : d;", "(<<= a (b c d))"},
 		{"a >>= b ? c : d;", "(>>= a (b c d))"},
 		{"a ^= b ? c : d;", "(^= a (b c d))"},
+		{"(0 ? 1 : 2) * 3;", "(* (0 1 2) 3)"},
+		{"0 ? 1 : 2, 3;", "(, (0 1 2) 3)"},
 	}
 	check(t, tt)
 }

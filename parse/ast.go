@@ -69,6 +69,16 @@ func (e *TernaryExpr) String() string {
 	return join(e.Cond, e.Then, e.Else)
 }
 
+type PostfixArithmeticExpr struct {
+	Type uint
+	Left Expr
+}
+
+func (e *PostfixArithmeticExpr) exprNode() {}
+func (e *PostfixArithmeticExpr) String() string {
+	return join(e.Left, e.Type)
+}
+
 type Int struct {
 	Value int64
 }

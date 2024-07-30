@@ -7,63 +7,62 @@ import (
 )
 
 const (
-	LOWEST = iota
-	COMMA  // ,
-	ASSIGN // = += -= *= ...
-	COND
-	OR
-	AND
-	BOR
-	XOR
-	BAND
-	EQ
-	ORDER
-	SHIFT
-	SUM
-	PRODUCT
-	UNARY // ~
-	CALL  // ()
-	SUF   // ++ --
-	IDX   // []
-	MEM   // .
-	GROUP
+	LOWEST  = iota
+	COMMA   // , 							(left-to-right)
+	ASSIGN  // = += -= etc.					(right-to-left)
+	COND    // a ? 1 : 0					(left-to-right)
+	OR      // ||							(left-to-right)
+	AND     // &&							(left-to-right)
+	BOR     // |							(left-to-right)
+	BXOR    // ^							(left-to-right)
+	BAND    // &							(left-to-right)
+	EQ      // == !=						(left-to-right)
+	ORDER   // < <= > =						(left-to-right)
+	SHIFT   // << >>						(left-to-right)
+	SUM     // + -							(left-to-right)
+	PRODUCT // * / %						(left-to-right)
+	PREFIX  // ++i --i +i -i !a ~a 			(right-to-left)
+	POSTFIX // i++ i-- printf() a[] . -> 	(left-to-right)
 )
 
 var prec = map[uint]uint{
-	lex.ASSIGN:     ASSIGN,
-	lex.MUL_ASSIGN: ASSIGN,
-	lex.ADD_ASSIGN: ASSIGN,
-	lex.MOD_ASSIGN: ASSIGN,
-	lex.SUB_ASSIGN: ASSIGN,
-	lex.DIV_ASSIGN: ASSIGN,
-	lex.BA_ASSIGN:  ASSIGN,
-	lex.BO_ASSIGN:  ASSIGN,
-	lex.XO_ASSIGN:  ASSIGN,
-	lex.RS_ASSIGN:  ASSIGN,
-	lex.LS_ASSIGN:  ASSIGN,
-	lex.QMARK:      COND,
-	lex.OR:         OR,
-	lex.AND:        AND,
-	lex.BOR:        BOR,
-	lex.BXOR:       XOR,
-	lex.BAND:       BAND,
-	lex.EQ:         EQ,
-	lex.NEQ:        EQ,
+	lex.INC:        POSTFIX,
+	lex.DEC:        POSTFIX,
+	lex.LPAREN:     POSTFIX,
+	lex.LBRACKET:   POSTFIX,
+	lex.DOT:        POSTFIX,
+	lex.ARROW:      POSTFIX,
+	lex.MUL:        PRODUCT,
+	lex.DIV:        PRODUCT,
+	lex.MOD:        PRODUCT,
+	lex.ADD:        SUM,
+	lex.SUB:        SUM,
+	lex.LSHIFT:     SHIFT,
+	lex.RSHIFT:     SHIFT,
 	lex.GT:         ORDER,
 	lex.LT:         ORDER,
 	lex.GEQ:        ORDER,
 	lex.LEQ:        ORDER,
-	lex.RSHIFT:     SHIFT,
-	lex.LSHIFT:     SHIFT,
-	lex.SUB:        SUM,
-	lex.ADD:        SUM,
-	lex.MUL:        PRODUCT,
-	lex.MOD:        PRODUCT,
-	lex.DIV:        PRODUCT,
-	lex.LPAREN:     CALL,
-	lex.INC:        SUF,
-	lex.DEC:        SUF,
-	lex.LBRACKET:   IDX,
+	lex.EQ:         EQ,
+	lex.NEQ:        EQ,
+	lex.BAND:       BAND,
+	lex.BXOR:       BXOR,
+	lex.BOR:        BOR,
+	lex.AND:        AND,
+	lex.OR:         OR,
+	lex.QMARK:      COND,
+	lex.ASSIGN:     ASSIGN,
+	lex.ADD_ASSIGN: ASSIGN,
+	lex.SUB_ASSIGN: ASSIGN,
+	lex.MUL_ASSIGN: ASSIGN,
+	lex.DIV_ASSIGN: ASSIGN,
+	lex.MOD_ASSIGN: ASSIGN,
+	lex.RS_ASSIGN:  ASSIGN,
+	lex.LS_ASSIGN:  ASSIGN,
+	lex.BA_ASSIGN:  ASSIGN,
+	lex.XO_ASSIGN:  ASSIGN,
+	lex.BO_ASSIGN:  ASSIGN,
+	lex.COMMA:      COMMA,
 }
 
 type Parser struct {
@@ -134,13 +133,16 @@ func (p *Parser) parseExpr(currPrec uint) Expr {
 		switch p.peek() {
 		case lex.ADD, lex.SUB, lex.MUL, lex.DIV, lex.MOD, lex.RSHIFT,
 			lex.LSHIFT, lex.LT, lex.GT, lex.LEQ, lex.GEQ, lex.EQ,
-			lex.NEQ, lex.BAND, lex.BXOR, lex.BOR, lex.AND, lex.OR:
+			lex.NEQ, lex.BAND, lex.BXOR, lex.BOR, lex.AND, lex.OR,
+			lex.DOT, lex.COMMA:
 			left = p.parseInfixOperator(left)
 		case lex.MOD_ASSIGN, lex.LS_ASSIGN, lex.RS_ASSIGN,
 			lex.BO_ASSIGN, lex.BA_ASSIGN, lex.XO_ASSIGN,
 			lex.DIV_ASSIGN, lex.ADD_ASSIGN, lex.SUB_ASSIGN,
 			lex.MUL_ASSIGN, lex.ASSIGN:
 			left = p.parseAssign(left)
+		case lex.INC, lex.DEC:
+			left = p.parsePostfixArithmetic(left)
 		// case lex.LPAREN:
 		// 	left = p.parseFunctionCall(left)
 		// case lex.LBRACKET:
@@ -159,10 +161,12 @@ func (p *Parser) parsePrefix() Expr {
 	case lex.INT_CONST:
 		n, _ := strconv.Atoi(p.curr.Literal)
 		return &Int{Value: int64(n)}
-	case lex.ADD, lex.SUB, lex.NOT:
+	case lex.ADD, lex.SUB, lex.NOT, lex.INC, lex.DEC,
+		lex.BAND, lex.BCOMP:
 		return p.parsePrefixOperator()
 	case lex.LPAREN:
-		if expr := p.parseExpr(GROUP); expr == nil {
+		p.adv()
+		if expr := p.parseExpr(LOWEST); expr == nil {
 			return nil
 		} else {
 			p.adv()
@@ -216,7 +220,7 @@ func (p *Parser) parsePrefixOperator() Expr {
 	}
 	p.adv()
 
-	if right := p.parseExpr(UNARY); right == nil {
+	if right := p.parseExpr(PREFIX); right == nil {
 		return nil
 	} else {
 		expr.Right = right
@@ -231,7 +235,7 @@ func (p *Parser) parseTernaryOperator(left Expr) Expr {
 	}
 	p.adv()
 
-	if Then := p.parseExpr(LOWEST); Then == nil {
+	if Then := p.parseExpr(COND); Then == nil {
 		return nil
 	} else {
 		expr.Then = Then
@@ -243,10 +247,19 @@ func (p *Parser) parseTernaryOperator(left Expr) Expr {
 	}
 	p.adv()
 
-	if Else := p.parseExpr(LOWEST); Else == nil {
+	if Else := p.parseExpr(COND); Else == nil {
 		return nil
 	} else {
 		expr.Else = Else
+	}
+
+	return expr
+}
+
+func (p *Parser) parsePostfixArithmetic(left Expr) Expr {
+	expr := &PostfixArithmeticExpr{
+		Type: p.peek(),
+		Left: left,
 	}
 
 	return expr
