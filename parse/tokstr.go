@@ -2,7 +2,7 @@ package parse
 
 import "gorilla/lex"
 
-var tok_strmap = []string{
+var tok_strmap = map[uint]string{
 	lex.EOF:         "EOF",
 	lex.ERR:         "ERR",
 	lex.AUTO:        "auto",
@@ -86,4 +86,6 @@ var tok_strmap = []string{
 	lex.STRING:      "string",
 	lex.INT_CONST:   "int_const",
 	lex.FLOAT_CONST: "float_const",
+	lex.BOR:         "|",
+	lex.ADD_ASSIGN:  "+=",
 }

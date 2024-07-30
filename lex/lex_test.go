@@ -2,7 +2,7 @@ package lex
 
 import "testing"
 
-var tmap = []string{
+var tmap = map[uint]string{
 	EOF:         "EOF",
 	ERR:         "ERR",
 	AUTO:        "auto",
@@ -88,6 +88,16 @@ var tmap = []string{
 	FLOAT_CONST: "float_const",
 }
 
+func TestString(t *testing.T) {
+	l := New(`"test"`)
+	if l.Lex().Literal != "test" {
+		t.Errorf("lex string failed\n")
+	}
+	l = New(`""`)
+	if l.Lex().Literal != "" {
+		t.Errorf("lex string failed\n")
+	}
+}
 func TestEmptyString(t *testing.T) {
 	l := New("")
 	seq := []uint{

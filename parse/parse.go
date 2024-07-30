@@ -161,6 +161,16 @@ func (p *Parser) parsePrefix() Expr {
 		return &Int{Value: int64(n)}
 	case lex.ADD, lex.SUB, lex.NOT:
 		return p.parsePrefixOperator()
+	case lex.LPAREN:
+		if expr := p.parseExpr(GROUP); expr == nil {
+			return nil
+		} else {
+			p.adv()
+			if !p.expect(lex.RPAREN) {
+				return nil
+			}
+			return expr
+		}
 	default:
 		return nil
 	}

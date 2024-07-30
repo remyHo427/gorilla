@@ -181,6 +181,8 @@ func (l *Lexer) Lex() Token {
 			return tok(ttype)
 		case '_':
 			return l.word()
+		case '"':
+			return l.string()
 
 		default:
 			l.adv()
@@ -194,6 +196,35 @@ func (l *Lexer) Lex() Token {
 	return tok(EOF)
 }
 
+func (l *Lexer) string() Token {
+	l.adv()
+	start := l.sp
+
+	for {
+		if l.isend() {
+			break
+		} else if l.peek() == '"' {
+			break
+		} else {
+			l.adv()
+		}
+	}
+
+	if l.isend() {
+		return Token{
+			Type:    ERR,
+			Literal: "unterminated string",
+		}
+	}
+
+	end := l.sp
+	l.adv()
+
+	return Token{
+		Type:    STRING,
+		Literal: string(l.src[start:end]),
+	}
+}
 func (l *Lexer) skip_comment() {
 	if c := l.peek(); c == '/' {
 		for {
