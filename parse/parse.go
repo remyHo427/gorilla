@@ -45,7 +45,7 @@ var prec = []uint{
 	lex.OR:         OR,
 	lex.AND:        AND,
 	lex.BOR:        BOR,
-	lex.XOR:        XOR,
+	lex.BXOR:       XOR,
 	lex.BAND:       BAND,
 	lex.EQ:         EQ,
 	lex.NEQ:        EQ,
@@ -134,7 +134,7 @@ func (p *Parser) parseExpr(currPrec uint) Expr {
 		switch p.peek() {
 		case lex.ADD, lex.SUB, lex.MUL, lex.DIV, lex.MOD, lex.RSHIFT,
 			lex.LSHIFT, lex.LT, lex.GT, lex.LEQ, lex.GEQ, lex.EQ,
-			lex.NEQ, lex.BAND, lex.XOR, lex.BOR, lex.AND, lex.OR:
+			lex.NEQ, lex.BAND, lex.BXOR, lex.BOR, lex.AND, lex.OR:
 			left = p.parseInfixOperator(left)
 		case lex.MOD_ASSIGN, lex.LS_ASSIGN, lex.RS_ASSIGN,
 			lex.BO_ASSIGN, lex.BA_ASSIGN, lex.XO_ASSIGN,

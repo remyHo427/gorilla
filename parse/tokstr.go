@@ -54,7 +54,7 @@ var tok_strmap = []string{
 	lex.SUB:         "-",
 	lex.AND:         "&&",
 	lex.OR:          "||",
-	lex.XOR:         "^",
+	lex.BXOR:        "^",
 	lex.NOT:         "!",
 	lex.ASSIGN:      "=",
 	lex.MUL_ASSIGN:  "*=",

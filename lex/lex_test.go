@@ -24,7 +24,7 @@ var tmap = map[uint]string{
 	SUB:         "SUB",
 	AND:         "AND",
 	OR:          "OR",
-	XOR:         "XOR",
+	BXOR:        "XOR",
 	NOT:         "NOT",
 	ASSIGN:      "ASSIGN",
 	MUL_ASSIGN:  "MUL_ASSIGN",
@@ -114,7 +114,7 @@ func TestOperators(t *testing.T) {
 		MUL_ASSIGN, MUL, MOD_ASSIGN, MOD, DIV_ASSIGN,
 		DIV, LS_ASSIGN, LSHIFT, LEQ, LT, RS_ASSIGN,
 		RSHIFT, GEQ, GT, AND, BA_ASSIGN, BAND,
-		OR, BO_ASSIGN, BOR, XO_ASSIGN, XOR, NEQ,
+		OR, BO_ASSIGN, BOR, XO_ASSIGN, BXOR, NEQ,
 		NOT, EQ, ASSIGN, EOF,
 	}
 	tokseq(*l, seq, t)

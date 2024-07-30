@@ -100,6 +100,9 @@ func (l *Lexer) Lex() Token {
 		case ',':
 			l.adv()
 			return tok(COMMA)
+		case '~':
+			l.adv()
+			return tok(BCOMP)
 		case '+':
 			l.adv()
 			ttype = l.match("+", INC, ttype)
@@ -161,7 +164,7 @@ func (l *Lexer) Lex() Token {
 		case '^':
 			l.adv()
 			ttype = l.match("=", XO_ASSIGN, ttype)
-			ttype = l.match("", XOR, ttype)
+			ttype = l.match("", BXOR, ttype)
 			return tok(ttype)
 		case '!':
 			l.adv()
