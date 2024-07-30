@@ -22,8 +22,10 @@ type ExprStmt struct {
 	Expr Expr
 }
 
-func (s *ExprStmt) stmtNode()      {}
-func (s *ExprStmt) String() string { return s.Expr.String() }
+func (s *ExprStmt) stmtNode() {}
+func (s *ExprStmt) String() string {
+	return s.Expr.String()
+}
 
 // expr
 type InfixExpr struct {
@@ -77,6 +79,35 @@ type PostfixArithmeticExpr struct {
 func (e *PostfixArithmeticExpr) exprNode() {}
 func (e *PostfixArithmeticExpr) String() string {
 	return join(e.Left, e.Type)
+}
+
+type CallExpr struct {
+	Callee Expr
+	Args   []Expr
+}
+
+func (e *CallExpr) exprNode() {}
+func (e *CallExpr) String() string {
+	var out bytes.Buffer
+
+	for i, a := range e.Args {
+		out.WriteString(a.String())
+		if i < len(e.Args)-1 {
+			out.WriteString(" ")
+		}
+	}
+
+	return join(e.Callee, out)
+}
+
+type IndexExpr struct {
+	Arr   Expr
+	Index Expr
+}
+
+func (e *IndexExpr) exprNode() {}
+func (e *IndexExpr) String() string {
+	return join(e.Arr, e.Index)
 }
 
 type Int struct {

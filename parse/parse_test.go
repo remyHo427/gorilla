@@ -31,7 +31,6 @@ func TestInfix(t *testing.T) {
 		{"1 | 1;", "(1 | 1)"},
 		{"1 && 1;", "(1 && 1)"},
 		{"1 || 1;", "(1 || 1)"},
-		{"1 , 1;", "(1 , 1)"},
 	}
 	check(t, tt)
 }
@@ -80,6 +79,23 @@ func TestTernary(t *testing.T) {
 	check(t, tt)
 }
 
+func TestCall(t *testing.T) {
+	tt := []Pair{
+		{"a();", "(a )"},
+		{"a(1);", "(a 1)"},
+		{"a(1, 2);", "(a 1 2)"},
+		{"a(1, b(2 + 3));", "(a 1 (b (2 + 3)))"},
+	}
+	check(t, tt)
+}
+
+func TestIndexing(t *testing.T) {
+	tt := []Pair{
+		{"a[i];", "(a i)"},
+		{"a[i+1];", "(a (i + 1))"},
+	}
+	check(t, tt)
+}
 func TestPrecedence(t *testing.T) {
 	tt := []Pair{
 		{"++a++;", "(++ (a ++))"},
@@ -117,7 +133,6 @@ func TestPrecedence(t *testing.T) {
 		{"a &= 1 ? 3 : 4;", "(a &= (1 3 4))"},
 		{"a ^= 1 ? 3 : 4;", "(a ^= (1 3 4))"},
 		{"a |= 1 ? 3 : 4;", "(a |= (1 3 4))"},
-		{"a = b, c;", "((a = b) , c)"},
 	}
 	check(t, tt)
 }
@@ -126,8 +141,8 @@ func TestAssociativity(t *testing.T) {
 	tt := []Pair{
 		{"a++++;", "((a ++) ++)"},
 		{"a----;", "((a --) --)"},
-		// {"a()()", "((a ()) ())"},
-		// {"a[][]", "((a []) [])"},
+		{"a()();", "((a ) )"},
+		{"a[1][1];", "((a 1) 1)"},
 		{"a.b.c;", "((a . b) . c)"},
 		{"++++a;", "(++ (++ a))"},
 		{"----a;", "(-- (-- a))"},
@@ -164,7 +179,6 @@ func TestAssociativity(t *testing.T) {
 		{"1 &= 2 &= 3;", "((1 &= 2) &= 3)"},
 		{"1 ^= 2 ^= 3;", "((1 ^= 2) ^= 3)"},
 		{"1 |= 2 |= 3;", "((1 |= 2) |= 3)"},
-		{"1 , 2 , 3;", "((1 , 2) , 3)"},
 	}
 	check(t, tt)
 }
@@ -180,6 +194,9 @@ func check(t *testing.T, tt []Pair) {
 		}
 
 		if len(p.err) > 0 {
+			continue
+		} else if len(tree) == 0 {
+			t.Errorf("no ast produced")
 			continue
 		}
 
