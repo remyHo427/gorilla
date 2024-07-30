@@ -130,7 +130,9 @@ func (l *Lexer) Lex() Token {
 			return tok(ttype)
 		case '/':
 			l.adv()
-			if c := l.peek(); c == '/' || c == '*' {
+			if l.isend() {
+				return tok(DIV)
+			} else if c := l.peek(); c == '/' || c == '*' {
 				l.skip_comment()
 				continue
 			} else {

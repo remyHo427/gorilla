@@ -17,7 +17,7 @@ const (
 	BXOR    // ^							(left-to-right)
 	BAND    // &							(left-to-right)
 	EQ      // == !=						(left-to-right)
-	ORDER   // < <= > =						(left-to-right)
+	ORDER   // < <= > >=					(left-to-right)
 	SHIFT   // << >>						(left-to-right)
 	SUM     // + -							(left-to-right)
 	PRODUCT // * / %						(left-to-right)
@@ -179,7 +179,6 @@ func (p *Parser) parsePrefix() Expr {
 		return nil
 	}
 }
-
 func (p *Parser) parseAssign(left Expr) Expr {
 	expr := &AssignExpr{
 		Type: p.peek(),
@@ -195,7 +194,6 @@ func (p *Parser) parseAssign(left Expr) Expr {
 
 	return expr
 }
-
 func (p *Parser) parseInfixOperator(left Expr) Expr {
 	expr := &InfixExpr{
 		Type: p.peek(),
@@ -213,7 +211,6 @@ func (p *Parser) parseInfixOperator(left Expr) Expr {
 
 	return expr
 }
-
 func (p *Parser) parsePrefixOperator() Expr {
 	expr := &PrefixExpr{
 		Type: p.peek(),
@@ -228,7 +225,6 @@ func (p *Parser) parsePrefixOperator() Expr {
 
 	return expr
 }
-
 func (p *Parser) parseTernaryOperator(left Expr) Expr {
 	expr := &TernaryExpr{
 		Cond: left,
@@ -255,7 +251,6 @@ func (p *Parser) parseTernaryOperator(left Expr) Expr {
 
 	return expr
 }
-
 func (p *Parser) parsePostfixArithmetic(left Expr) Expr {
 	expr := &PostfixArithmeticExpr{
 		Type: p.peek(),
