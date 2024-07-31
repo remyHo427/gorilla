@@ -8,24 +8,18 @@ var tmap = map[uint]string{
 	AUTO:        "auto",
 	BREAK:       "break",
 	CASE:        "case",
-	CHAR:        "char",
 	CONST:       "const",
 	CONTINUE:    "continue",
 	DEFAULT:     "default",
 	DO:          "do",
-	DOUBLE:      "double",
 	ELSE:        "else",
 	ENUM:        "enum",
 	EXTERN:      "extern",
-	FLOAT:       "float",
 	FOR:         "for",
 	GOTO:        "goto",
 	IF:          "if",
-	INT:         "int",
-	LONG:        "long",
 	REGISTER:    "register",
 	RETURN:      "return",
-	SHORT:       "short",
 	SIGNED:      "signed",
 	SIZEOF:      "sizeof",
 	STATIC:      "static",
@@ -113,15 +107,15 @@ func TestSpaceOnly(t *testing.T) {
 	tokseq(*l, seq, t)
 }
 func TestKeywords(t *testing.T) {
-	l := New(`auto break case char const continue default do
-	double else enum extern float for goto if int long
-	register return short signed sizeof static struct
-	switch typedef union unsigned void volatile while`)
+	l := New(`auto break case const continue default do
+	else enum extern for goto if register return signed 
+	sizeof static struct switch typedef union unsigned 
+	void volatile while`)
 	seq := []uint{
-		AUTO, BREAK, CASE, CHAR, CONST, CONTINUE, DEFAULT, DO,
-		DOUBLE, ELSE, ENUM, EXTERN, FLOAT, FOR, GOTO, IF, INT, LONG,
-		REGISTER, RETURN, SHORT, SIGNED, SIZEOF, STATIC, STRUCT,
-		SWITCH, TYPEDEF, UNION, UNSIGNED, VOID, VOLATILE, WHILE,
+		AUTO, BREAK, CASE, CONST, CONTINUE, DEFAULT, DO,
+		ELSE, ENUM, EXTERN, FOR, GOTO, IF, REGISTER, RETURN,
+		SIGNED, SIZEOF, STATIC, STRUCT, SWITCH, TYPEDEF,
+		UNION, UNSIGNED, VOID, VOLATILE, WHILE,
 	}
 	tokseq(*l, seq, t)
 }

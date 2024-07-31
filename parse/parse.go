@@ -66,19 +66,31 @@ var prec = map[uint]uint{
 }
 
 type Parser struct {
-	l    *lex.Lexer
-	curr lex.Token
-	next lex.Token
-	err  []error
+	l     *lex.Lexer
+	curr  lex.Token
+	next  lex.Token
+	types map[string]bool
+	err   []error
 }
 
 func New(l *lex.Lexer) *Parser {
 	p := &Parser{l: l}
+
 	p.adv()
 	p.adv()
 
+	p.types = map[string]bool{
+		"char":   true,
+		"double": true,
+		"float":  true,
+		"int":    true,
+		"long":   true,
+		"short":  true,
+	}
+
 	return p
 }
+
 func (p *Parser) Parse() ([]Stmt, []error) {
 	stmts := []Stmt{}
 
