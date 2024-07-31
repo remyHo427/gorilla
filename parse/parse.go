@@ -135,7 +135,7 @@ func (p *Parser) parseIfStmt() Stmt {
 	}
 	p.adv()
 
-	if Then := p.parseBlockStmt(); Then == nil {
+	if Then := p.parseStmt(); Then == nil {
 		return nil
 	} else {
 		stmt.Then = Then

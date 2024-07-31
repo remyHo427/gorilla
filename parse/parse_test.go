@@ -14,6 +14,7 @@ func TestWhileStmt(t *testing.T) {
 	tt := []Pair{
 		{"while (true) { a; }", "(while true (block a))"},
 		{"while (true) { if (a) { b; } }", "(while true (block (if a (block b) )))"},
+		{"while (true) a; b;", "(while true a)"},
 	}
 
 	check(t, tt)
@@ -34,6 +35,9 @@ func TestIfStmt(t *testing.T) {
 		{"if (a) { if (b) { c; } else { d; }}", "(if a (block (if b (block c) (block d))) )"},
 		{"if (a) { b; } else if (c) { d; } else { e; }", "(if a (block b) (if c (block d) (block e)))"},
 		{"if (a) {} else if (b) {} else if (c) {} else {}", "(if a (block ) (if b (block ) (if c (block ) (block ))))"},
+		{"if (a) b; else c;", "(if a b c)"},
+		{"if (a) if (b) c; else d;", "(if a (if b c d) )"},
+		{"if (a) b; c;", "(if a b )"},
 	}
 
 	check(t, tt)
