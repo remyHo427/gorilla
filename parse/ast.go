@@ -27,6 +27,26 @@ func (s *ExprStmt) String() string {
 	return s.Expr.String()
 }
 
+type IfStmt struct {
+	If   Expr
+	Then Stmt
+	Else Stmt
+}
+
+func (s *IfStmt) stmtNode() {}
+func (s *IfStmt) String() string {
+	return join("if", s.If, s.Then, s.Else)
+}
+
+type BlockStmt struct {
+	Stmts []Stmt
+}
+
+func (s *BlockStmt) stmtNode() {}
+func (s *BlockStmt) String() string {
+	return join("block", s.Stmts)
+}
+
 // expr
 type InfixExpr struct {
 	Type  uint
@@ -88,16 +108,7 @@ type CallExpr struct {
 
 func (e *CallExpr) exprNode() {}
 func (e *CallExpr) String() string {
-	var out bytes.Buffer
-
-	for i, a := range e.Args {
-		out.WriteString(a.String())
-		if i < len(e.Args)-1 {
-			out.WriteString(" ")
-		}
-	}
-
-	return join(e.Callee, out)
+	return join(e.Callee, e.Args)
 }
 
 type IndexExpr struct {
@@ -145,6 +156,20 @@ func join(args ...any) string {
 			out.WriteString(t)
 		case uint:
 			out.WriteString(tok_strmap[t])
+		case []Expr:
+			for i, e := range t {
+				out.WriteString(e.String())
+				if i < len(t)-1 {
+					out.WriteString(" ")
+				}
+			}
+		case []Stmt:
+			for i, s := range t {
+				out.WriteString(s.String())
+				if i < len(t)-1 {
+					out.WriteString(" ")
+				}
+			}
 		}
 
 		if i < len(args)-1 {

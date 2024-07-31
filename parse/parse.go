@@ -103,20 +103,91 @@ func (p *Parser) Parse() ([]Stmt, []error) {
 // stmt
 func (p *Parser) parseStmt() Stmt {
 	switch p.peek() {
+	case lex.IF:
+		return p.parseIfStmt()
+	case lex.LBRACE:
+		return p.parseBlockStmt()
 	default:
-		expr := p.parseExpr(LOWEST)
-		if expr == nil {
-			return nil
-		}
-		p.adv()
-
-		if !p.expect(lex.SCOLON) {
-			return nil
-		}
-		p.adv()
-
-		return &ExprStmt{Expr: expr}
+		return p.parseExprStmt()
 	}
+}
+
+func (p *Parser) parseIfStmt() Stmt {
+	stmt := &IfStmt{}
+	p.adv()
+
+	if !p.expect(lex.LPAREN) {
+		return nil
+	}
+	p.adv()
+
+	if If := p.parseExpr(LOWEST); If == nil {
+		return nil
+	} else {
+		stmt.If = If
+	}
+	p.adv()
+
+	if !p.expect(lex.RPAREN) {
+		return nil
+	}
+	p.adv()
+
+	if Then := p.parseBlockStmt(); Then == nil {
+		return nil
+	} else {
+		stmt.Then = Then
+	}
+
+	if !p.is(lex.ELSE) {
+		return stmt
+	}
+	p.adv()
+
+	if Else := p.parseBlockStmt(); Else == nil {
+		return nil
+	} else {
+		stmt.Else = Else
+	}
+
+	return stmt
+}
+
+func (p *Parser) parseBlockStmt() Stmt {
+	block := &BlockStmt{}
+	p.adv()
+
+	stmts := []Stmt{}
+	for !p.is(lex.RBRACE) && !p.is(lex.EOF) {
+		if s := p.parseStmt(); s == nil {
+			return nil
+		} else {
+			stmts = append(stmts, s)
+		}
+	}
+	block.Stmts = stmts
+
+	if !p.expect(lex.RBRACE) {
+		return nil
+	}
+	p.adv()
+
+	return block
+}
+
+func (p *Parser) parseExprStmt() Stmt {
+	expr := p.parseExpr(LOWEST)
+	if expr == nil {
+		return nil
+	}
+	p.adv()
+
+	if !p.expect(lex.SCOLON) {
+		return nil
+	}
+	p.adv()
+
+	return &ExprStmt{Expr: expr}
 }
 
 // expr

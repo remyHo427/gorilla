@@ -10,6 +10,24 @@ type Pair struct {
 	output string
 }
 
+func TestBlockStmt(t *testing.T) {
+	tt := []Pair{
+		{"{ a; b; }", "(block a b)"},
+		{"{ if (a) { b; } }", "(block (if a (block b) ))"},
+	}
+
+	check(t, tt)
+}
+
+func TestIfStmt(t *testing.T) {
+	tt := []Pair{
+		{"if (true) { true; }", "(if true (block true) )"},
+		{"if (true) { true; } else { false; }", "(if true (block true) (block false))"},
+		{"if (a) { if (b) { c; } else { d; }}", "(if a (block (if b (block c) (block d))) )"},
+	}
+
+	check(t, tt)
+}
 func TestInfix(t *testing.T) {
 	tt := []Pair{
 		{"1 . 1;", "(1 . 1)"},
