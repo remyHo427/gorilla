@@ -10,6 +10,14 @@ type Pair struct {
 	output string
 }
 
+func TestWhileStmt(t *testing.T) {
+	tt := []Pair{
+		{"while (true) { a; }", "(while true (block a))"},
+		{"while (true) { if (a) { b; } }", "(while true (block (if a (block b) )))"},
+	}
+
+	check(t, tt)
+}
 func TestBlockStmt(t *testing.T) {
 	tt := []Pair{
 		{"{ a; b; }", "(block a b)"},
@@ -24,6 +32,8 @@ func TestIfStmt(t *testing.T) {
 		{"if (true) { true; }", "(if true (block true) )"},
 		{"if (true) { true; } else { false; }", "(if true (block true) (block false))"},
 		{"if (a) { if (b) { c; } else { d; }}", "(if a (block (if b (block c) (block d))) )"},
+		{"if (a) { b; } else if (c) { d; } else { e; }", "(if a (block b) (if c (block d) (block e)))"},
+		{"if (a) {} else if (b) {} else if (c) {} else {}", "(if a (block ) (if b (block ) (if c (block ) (block ))))"},
 	}
 
 	check(t, tt)

@@ -105,6 +105,8 @@ func (p *Parser) parseStmt() Stmt {
 	switch p.peek() {
 	case lex.IF:
 		return p.parseIfStmt()
+	case lex.WHILE:
+		return p.parseWhileStmt()
 	case lex.LBRACE:
 		return p.parseBlockStmt()
 	default:
@@ -144,10 +146,40 @@ func (p *Parser) parseIfStmt() Stmt {
 	}
 	p.adv()
 
-	if Else := p.parseBlockStmt(); Else == nil {
+	if Else := p.parseStmt(); Else == nil {
 		return nil
 	} else {
 		stmt.Else = Else
+	}
+
+	return stmt
+}
+
+func (p *Parser) parseWhileStmt() Stmt {
+	stmt := &WhileStmt{}
+	p.adv()
+
+	if !p.expect(lex.LPAREN) {
+		return nil
+	}
+	p.adv()
+
+	if cond := p.parseExpr(LOWEST); cond == nil {
+		return nil
+	} else {
+		stmt.Cond = cond
+	}
+	p.adv()
+
+	if !p.expect(lex.RPAREN) {
+		return nil
+	}
+	p.adv()
+
+	if loop := p.parseStmt(); loop == nil {
+		return nil
+	} else {
+		stmt.Loop = loop
 	}
 
 	return stmt
@@ -387,9 +419,6 @@ func (p *Parser) peek() uint {
 }
 func (p *Parser) is(ttype uint) bool {
 	return p.curr.Type == ttype
-}
-func (p *Parser) isn(ttype uint) bool {
-	return p.next.Type == ttype
 }
 func (p *Parser) precn() uint {
 	return prec[p.next.Type]

@@ -47,6 +47,16 @@ func (s *BlockStmt) String() string {
 	return join("block", s.Stmts)
 }
 
+type WhileStmt struct {
+	Cond Expr
+	Loop Stmt
+}
+
+func (s *WhileStmt) stmtNode() {}
+func (s *WhileStmt) String() string {
+	return join("while", s.Cond, s.Loop)
+}
+
 // expr
 type InfixExpr struct {
 	Type  uint
