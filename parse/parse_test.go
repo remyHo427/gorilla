@@ -10,27 +10,53 @@ type Pair struct {
 	output string
 }
 
+func TestForStmt(t *testing.T) {
+	tt := []Pair{
+		{"for (;;) {}", "(for (null) (null)  (block ))"},
+		{"for (i = 0; i < 10; i++) a;", "(for (i = 0) (i < 10) (i ++) a)"},
+		{"for (i = 0;; i++) a;", "(for (i = 0) (null) (i ++) a)"},
+		{"for (;i < 10; i++) a;", "(for (null) (i < 10) (i ++) a)"},
+		{"for (;;i++) a;", "(for (null) (null) (i ++) a)"},
+	}
+
+	check(t, tt)
+}
+func TestDoStmt(t *testing.T) {
+	tt := []Pair{
+		{"do { a; } while (b);", "(do b (block a))"},
+	}
+
+	check(t, tt)
+}
+
 func TestNullStmt(t *testing.T) {
 	tt := []Pair{
 		{";", "(null)"},
+		{"while (true) ;", "(while true (null))"},
+		{"{;;}", "(block (null) (null))"},
 	}
 
 	check(t, tt)
 }
+
 func TestContinueStmt(t *testing.T) {
 	tt := []Pair{
 		{"continue;", "(continue)"},
+		{"while (true) continue;", "(while true (continue))"},
 	}
 
 	check(t, tt)
 }
+
 func TestBreakStmt(t *testing.T) {
 	tt := []Pair{
 		{"break;", "(break)"},
+		{"while (false) break;", "(while false (break))"},
 	}
 
 	check(t, tt)
 }
+
 func TestReturnStmt(t *testing.T) {
 	tt := []Pair{
 		{"return 1;", "(return 1)"},
@@ -39,6 +65,7 @@ func TestReturnStmt(t *testing.T) {
 
 	check(t, tt)
 }
+
 func TestWhileStmt(t *testing.T) {
 	tt := []Pair{
 		{"while (true) { a; }", "(while true (block a))"},
@@ -48,6 +75,7 @@ func TestWhileStmt(t *testing.T) {
 
 	check(t, tt)
 }
+
 func TestBlockStmt(t *testing.T) {
 	tt := []Pair{
 		{"{ a; b; }", "(block a b)"},

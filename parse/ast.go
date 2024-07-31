@@ -87,6 +87,28 @@ func (s *NullStmt) String() string {
 	return join("null")
 }
 
+type DoStmt struct {
+	Cond Expr
+	Loop Stmt
+}
+
+func (s *DoStmt) stmtNode() {}
+func (s *DoStmt) String() string {
+	return join("do", s.Cond, s.Loop)
+}
+
+type ForStmt struct {
+	Init Stmt
+	Cond Stmt
+	Post Expr
+	Loop Stmt
+}
+
+func (s *ForStmt) stmtNode() {}
+func (s *ForStmt) String() string {
+	return join("for", s.Init, s.Cond, s.Post, s.Loop)
+}
+
 // expr
 type InfixExpr struct {
 	Type  uint

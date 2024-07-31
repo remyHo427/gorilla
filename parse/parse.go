@@ -113,10 +113,12 @@ func (p *Parser) parseStmt() Stmt {
 		return p.parseBreakStmt()
 	case lex.CONTINUE:
 		return p.parseContinueStmt()
-	case lex.SCOLON:
-		return p.parseNullStmt()
 	case lex.LBRACE:
 		return p.parseBlockStmt()
+	case lex.DO:
+		return p.parseDoStmt()
+	case lex.FOR:
+		return p.parseForStmt()
 	default:
 		return p.parseExprStmt()
 	}
@@ -236,9 +238,82 @@ func (p *Parser) parseContinueStmt() Stmt {
 	return stmt
 }
 
-func (p *Parser) parseNullStmt() Stmt {
-	stmt := &NullStmt{}
+func (p *Parser) parseDoStmt() Stmt {
+	stmt := &DoStmt{}
 	p.adv()
+
+	if loop := p.parseStmt(); loop == nil {
+		return nil
+	} else {
+		stmt.Loop = loop
+	}
+
+	if !p.expect(lex.WHILE) {
+		return nil
+	}
+	p.adv()
+
+	if !p.expect(lex.LPAREN) {
+		return nil
+	}
+	p.adv()
+
+	if cond := p.parseExpr(LOWEST); cond == nil {
+		return nil
+	} else {
+		stmt.Cond = cond
+	}
+	p.adv()
+
+	if !p.expect(lex.RPAREN) {
+		return nil
+	}
+	p.adv()
+
+	if !p.expect(lex.SCOLON) {
+		return nil
+	}
+	p.adv()
+
+	return stmt
+}
+
+func (p *Parser) parseForStmt() Stmt {
+	stmt := &ForStmt{}
+	p.adv()
+
+	if !p.expect(lex.LPAREN) {
+		return nil
+	}
+	p.adv()
+
+	if init := p.parseExprStmt(); init == nil {
+		return nil
+	} else {
+		stmt.Init = init
+	}
+
+	if cond := p.parseExprStmt(); cond == nil {
+		return nil
+	} else {
+		stmt.Cond = cond
+	}
+
+	if post := p.parseExpr(LOWEST); post != nil {
+		p.adv()
+		stmt.Post = post
+	}
+
+	if !p.expect(lex.RPAREN) {
+		return nil
+	}
+	p.adv()
+
+	if loop := p.parseStmt(); loop == nil {
+		return nil
+	} else {
+		stmt.Loop = loop
+	}
 
 	return stmt
 }
@@ -266,6 +341,11 @@ func (p *Parser) parseBlockStmt() Stmt {
 }
 
 func (p *Parser) parseExprStmt() Stmt {
+	if p.is(lex.SCOLON) {
+		p.adv()
+		return &NullStmt{}
+	}
+
 	expr := p.parseExpr(LOWEST)
 	if expr == nil {
 		return nil
