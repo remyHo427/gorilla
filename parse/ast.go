@@ -57,6 +57,36 @@ func (s *WhileStmt) String() string {
 	return join("while", s.Cond, s.Loop)
 }
 
+type ReturnStmt struct {
+	Return Expr
+}
+
+func (s *ReturnStmt) stmtNode() {}
+func (s *ReturnStmt) String() string {
+	return join("return", s.Return)
+}
+
+type BreakStmt struct{}
+
+func (s *BreakStmt) stmtNode() {}
+func (s *BreakStmt) String() string {
+	return join("break")
+}
+
+type ContinueStmt struct{}
+
+func (s *ContinueStmt) stmtNode() {}
+func (s *ContinueStmt) String() string {
+	return join("continue")
+}
+
+type NullStmt struct{}
+
+func (s *NullStmt) stmtNode() {}
+func (s *NullStmt) String() string {
+	return join("null")
+}
+
 // expr
 type InfixExpr struct {
 	Type  uint

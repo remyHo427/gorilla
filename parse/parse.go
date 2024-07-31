@@ -107,6 +107,14 @@ func (p *Parser) parseStmt() Stmt {
 		return p.parseIfStmt()
 	case lex.WHILE:
 		return p.parseWhileStmt()
+	case lex.RETURN:
+		return p.parseReturnStmt()
+	case lex.BREAK:
+		return p.parseBreakStmt()
+	case lex.CONTINUE:
+		return p.parseContinueStmt()
+	case lex.SCOLON:
+		return p.parseNullStmt()
 	case lex.LBRACE:
 		return p.parseBlockStmt()
 	default:
@@ -181,6 +189,56 @@ func (p *Parser) parseWhileStmt() Stmt {
 	} else {
 		stmt.Loop = loop
 	}
+
+	return stmt
+}
+
+func (p *Parser) parseReturnStmt() Stmt {
+	stmt := &ReturnStmt{}
+	p.adv()
+
+	if rtrn := p.parseExpr(LOWEST); rtrn == nil {
+		return nil
+	} else {
+		stmt.Return = rtrn
+	}
+	p.adv()
+
+	if !p.expect(lex.SCOLON) {
+		return nil
+	}
+	p.adv()
+
+	return stmt
+}
+
+func (p *Parser) parseBreakStmt() Stmt {
+	stmt := &BreakStmt{}
+	p.adv()
+
+	if !p.expect(lex.SCOLON) {
+		return nil
+	}
+	p.adv()
+
+	return stmt
+}
+
+func (p *Parser) parseContinueStmt() Stmt {
+	stmt := &ContinueStmt{}
+	p.adv()
+
+	if !p.expect(lex.SCOLON) {
+		return nil
+	}
+	p.adv()
+
+	return stmt
+}
+
+func (p *Parser) parseNullStmt() Stmt {
+	stmt := &NullStmt{}
+	p.adv()
 
 	return stmt
 }

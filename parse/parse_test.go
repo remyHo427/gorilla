@@ -10,6 +10,35 @@ type Pair struct {
 	output string
 }
 
+func TestNullStmt(t *testing.T) {
+	tt := []Pair{
+		{";", "(null)"},
+	}
+
+	check(t, tt)
+}
+func TestContinueStmt(t *testing.T) {
+	tt := []Pair{
+		{"continue;", "(continue)"},
+	}
+
+	check(t, tt)
+}
+func TestBreakStmt(t *testing.T) {
+	tt := []Pair{
+		{"break;", "(break)"},
+	}
+
+	check(t, tt)
+}
+func TestReturnStmt(t *testing.T) {
+	tt := []Pair{
+		{"return 1;", "(return 1)"},
+		{"return a + (b * 2);", "(return (a + (b * 2)))"},
+	}
+
+	check(t, tt)
+}
 func TestWhileStmt(t *testing.T) {
 	tt := []Pair{
 		{"while (true) { a; }", "(while true (block a))"},
