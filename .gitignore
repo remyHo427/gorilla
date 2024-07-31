@@ -1,5 +1,6 @@
 *.yacc
 *.txt
+*.lex
 
 # binary
 gorilla

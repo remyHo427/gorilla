@@ -137,6 +137,8 @@ func (p *Parser) parseStmt() Stmt {
 		return p.parseCaseStmt()
 	case lex.DEFAULT:
 		return p.parseDefaultStmt()
+	// case lex.IDENT:
+	// 	return p.parseDecl()
 	default:
 		return p.parseExprStmt()
 	}
@@ -647,6 +649,12 @@ func (p *Parser) parseArrayIndexing(left Expr) Expr {
 
 	return expr
 }
+
+// decl
+// func (p *Parser) parseDecl() Stmt {
+
+// 	return &NullStmt{}
+// }
 
 func (p *Parser) peek() uint {
 	return p.curr.Type
