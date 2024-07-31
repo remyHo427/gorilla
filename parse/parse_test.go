@@ -10,6 +10,29 @@ type Pair struct {
 	output string
 }
 
+func TestDefaultStmt(t *testing.T) {
+	tt := []Pair{
+		{"default: a;", "(default a)"},
+	}
+
+	check(t, tt)
+}
+func TestCaseStmt(t *testing.T) {
+	tt := []Pair{
+		{"case 1: a;", "(case 1 a)"},
+	}
+
+	check(t, tt)
+}
+func TestSwitchStmt(t *testing.T) {
+	tt := []Pair{
+		{"switch (c) { }", "(switch c (block ))"},
+		{"switch (c) { case 1: a; case 2: b; default: c; }", "(switch c (block (case 1 a) (case 2 b) (default c)))"},
+	}
+
+	check(t, tt)
+}
+
 func TestForStmt(t *testing.T) {
 	tt := []Pair{
 		{"for (;;) {}", "(for (null) (null)  (block ))"},
@@ -61,6 +84,7 @@ func TestReturnStmt(t *testing.T) {
 	tt := []Pair{
 		{"return 1;", "(return 1)"},
 		{"return a + (b * 2);", "(return (a + (b * 2)))"},
+		{"return;", "(return )"},
 	}
 
 	check(t, tt)

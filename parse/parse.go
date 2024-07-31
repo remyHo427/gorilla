@@ -119,6 +119,12 @@ func (p *Parser) parseStmt() Stmt {
 		return p.parseDoStmt()
 	case lex.FOR:
 		return p.parseForStmt()
+	case lex.SWITCH:
+		return p.parseSwitchStmt()
+	case lex.CASE:
+		return p.parseCaseStmt()
+	case lex.DEFAULT:
+		return p.parseDefaultStmt()
 	default:
 		return p.parseExprStmt()
 	}
@@ -198,6 +204,11 @@ func (p *Parser) parseWhileStmt() Stmt {
 func (p *Parser) parseReturnStmt() Stmt {
 	stmt := &ReturnStmt{}
 	p.adv()
+
+	if p.is(lex.SCOLON) {
+		p.adv()
+		return stmt
+	}
 
 	if rtrn := p.parseExpr(LOWEST); rtrn == nil {
 		return nil
@@ -358,6 +369,79 @@ func (p *Parser) parseExprStmt() Stmt {
 	p.adv()
 
 	return &ExprStmt{Expr: expr}
+}
+
+func (p *Parser) parseSwitchStmt() Stmt {
+	stmt := &SwitchStmt{}
+	p.adv()
+
+	if !p.expect(lex.LPAREN) {
+		return nil
+	}
+	p.adv()
+
+	if expr := p.parseExpr(LOWEST); expr == nil {
+		return nil
+	} else {
+		stmt.Cond = expr
+	}
+	p.adv()
+
+	if !p.expect(lex.RPAREN) {
+		return nil
+	}
+	p.adv()
+
+	if body := p.parseStmt(); body == nil {
+		return nil
+	} else {
+		stmt.Stmt = body
+	}
+
+	return stmt
+}
+
+func (p *Parser) parseCaseStmt() Stmt {
+	stmt := &CaseStmt{}
+	p.adv()
+
+	if expr := p.parseExpr(LOWEST); expr == nil {
+		return nil
+	} else {
+		stmt.Cond = expr
+	}
+	p.adv()
+
+	if !p.expect(lex.COLON) {
+		return nil
+	}
+	p.adv()
+
+	if s := p.parseStmt(); s == nil {
+		return nil
+	} else {
+		stmt.Stmt = s
+	}
+
+	return stmt
+}
+
+func (p *Parser) parseDefaultStmt() Stmt {
+	stmt := &DefaultStmt{}
+	p.adv()
+
+	if !p.expect(lex.COLON) {
+		return nil
+	}
+	p.adv()
+
+	if s := p.parseStmt(); s == nil {
+		return nil
+	} else {
+		stmt.Stmt = s
+	}
+
+	return stmt
 }
 
 // expr

@@ -109,6 +109,35 @@ func (s *ForStmt) String() string {
 	return join("for", s.Init, s.Cond, s.Post, s.Loop)
 }
 
+type SwitchStmt struct {
+	Cond Expr
+	Stmt Stmt
+}
+
+func (s *SwitchStmt) stmtNode() {}
+func (s *SwitchStmt) String() string {
+	return join("switch", s.Cond, s.Stmt)
+}
+
+type CaseStmt struct {
+	Cond Expr
+	Stmt Stmt
+}
+
+func (s *CaseStmt) stmtNode() {}
+func (s *CaseStmt) String() string {
+	return join("case", s.Cond, s.Stmt)
+}
+
+type DefaultStmt struct {
+	Stmt Stmt
+}
+
+func (s *DefaultStmt) stmtNode() {}
+func (s *DefaultStmt) String() string {
+	return join("default", s.Stmt)
+}
+
 // expr
 type InfixExpr struct {
 	Type  uint
