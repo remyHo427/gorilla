@@ -59,9 +59,3 @@
 5 initializer_list
     = initializer { ',' initializer }
     ;
-
-
-
-
-
-
