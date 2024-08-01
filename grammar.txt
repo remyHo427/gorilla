@@ -1,0 +1,67 @@
+1 declaration
+    = declaration_specifier+ init_declarator_list? ';'
+    ;
+
+2 declaration_specifier
+    = storage_class_specifier
+    | type_specifier
+    | type_qualifier
+    ;
+
+3 storage_class_specifier
+    = TYPEDEF
+    | EXTERN
+    | STATIC
+    | AUTO
+    | REGISTER
+    ;
+
+3 type_specifier
+    = VOID
+    | CHAR
+    | SHORT
+    | INT
+    | LONG
+    | FLOAT
+    | DOUBLE
+    | SIGNED
+    | UNSIGNED
+    | struct_or_union_specifier
+    | enum_specifier
+    | type_name
+    ;
+
+2 init_declarator_list
+    = init_declarator { "," init_declarator }
+    ;
+
+3 init_declarator
+    = declarator [ '=' initializer ]
+    ;
+
+4 declarator
+    = [ pointer ] direct_declarator
+    ;
+
+5 direct_declarator
+    = IDENT
+    | '(' declarator ')'
+    | direct_declarator '[' constant_expression? ']'
+    | direct_declarator '(' parameter_type_list? ')'
+    | direct_declarator '(' identifier_list? ')'
+    ;
+
+4 initializer
+    = assignment_expression
+    | '{' initializer_list ','? '}'
+    ;
+
+5 initializer_list
+    = initializer { ',' initializer }
+    ;
+
+
+
+
+
+

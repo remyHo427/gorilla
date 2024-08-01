@@ -5,6 +5,7 @@ import "testing"
 func TestEnum(t *testing.T) {
 	tt := []Pair{
 		{"enum Op { EOF, JMP, POP };", "(decl (enum Op EOF JMP POP))"},
+		{"enum Op { EOF };", "(decl (enum Op EOF))"},
 	}
 
 	check(t, tt)

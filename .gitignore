@@ -1,5 +1,4 @@
 *.yacc
-*.txt
 *.lex
 
 # binary
