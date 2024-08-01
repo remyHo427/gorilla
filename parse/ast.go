@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"gorilla/lex"
 	"strconv"
+	"strings"
 )
 
 type Node interface {
@@ -181,6 +182,25 @@ func (d *DefaultTypeSpecifier) String() string {
 	return join("default_type_specifier", d.Type)
 }
 
+type TypeSpecifier struct {
+	Literal string
+}
+
+func (d *TypeSpecifier) declNode() {}
+func (d *TypeSpecifier) String() string {
+	return join("type_specifier", d.Literal)
+}
+
+type Enum struct {
+	name  string
+	enums []string
+}
+
+func (d *Enum) declNode() {}
+func (d *Enum) String() string {
+	return join("enum", d.name, d.enums)
+}
+
 // expr
 type InfixExpr struct {
 	Type  uint
@@ -313,6 +333,8 @@ func join(args ...any) string {
 					out.WriteString(" ")
 				}
 			}
+		case []string:
+			out.WriteString(strings.Join(t, " "))
 		}
 
 		if i < len(args)-1 {

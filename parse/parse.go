@@ -80,12 +80,7 @@ func New(l *lex.Lexer) *Parser {
 	p.adv()
 
 	p.types = map[string]bool{
-		"char":   true,
-		"double": true,
-		"float":  true,
-		"int":    true,
-		"long":   true,
-		"short":  true,
+		"bool": true,
 	}
 
 	return p
@@ -140,10 +135,17 @@ func (p *Parser) parseStmt() Stmt {
 	case lex.TYPEDEF, lex.EXTERN, lex.STATIC, lex.AUTO, lex.REGISTER,
 		lex.CONST, lex.VOLATILE:
 		return p.parseDeclStmt()
-	// case lex.IDENT:
-	// 	return p.parseDecl()
+	case lex.SCOLON:
+		p.adv()
+		return &NullStmt{}
 	default:
-		return p.parseExprStmt()
+		if decl := p.parseDeclStmt(); decl != nil {
+			return decl
+		} else if expr := p.parseExprStmt(); expr != nil {
+			return expr
+		} else {
+			return nil
+		}
 	}
 }
 
@@ -369,6 +371,8 @@ func (p *Parser) parseBlockStmt() Stmt {
 }
 
 func (p *Parser) parseExprStmt() Stmt {
+	// required because when parsing inside for (...) there
+	// might be null statements
 	if p.is(lex.SCOLON) {
 		p.adv()
 		return &NullStmt{}
@@ -667,20 +671,29 @@ func (p *Parser) parseDeclStmt() Stmt {
 
 	decls := []Decl{}
 	for !p.is(lex.SCOLON) && !p.is(lex.EOF) {
-		switch p.peek() {
+		var decl Decl
+
+		switch ttype := p.peek(); ttype {
 		case lex.TYPEDEF, lex.EXTERN, lex.STATIC, lex.AUTO, lex.REGISTER:
-			decls = append(decls, &StorageClass{
-				Type: p.peek(),
-			})
+			decl = p.parseStorageClass(ttype)
 		case lex.CONST, lex.VOLATILE:
-			decls = append(decls, &TypeQualifer{
-				Type: p.peek(),
-			})
+			decl = p.parseTypeQualifier(ttype)
+		case lex.VOID, lex.CHAR, lex.SHORT, lex.INT, lex.LONG,
+			lex.FLOAT, lex.DOUBLE, lex.SIGNED, lex.UNSIGNED:
+			decl = p.parseDefaultTypeSpecifier(ttype)
+		case lex.ENUM:
+			decl = p.parseEnum()
+		case lex.IDENT:
+			decl = p.parseTypeSpecifier()
 		default:
-			return nil
+			decl = nil
 		}
 
-		p.adv()
+		if decl == nil {
+			return nil
+		} else {
+			decls = append(decls, decl)
+		}
 	}
 
 	if !p.expect(lex.SCOLON) {
@@ -692,6 +705,89 @@ func (p *Parser) parseDeclStmt() Stmt {
 	return stmt
 }
 
+func (p *Parser) parseStorageClass(ttype uint) Decl {
+	p.adv()
+	return &StorageClass{
+		Type: ttype,
+	}
+}
+
+func (p *Parser) parseTypeQualifier(ttype uint) Decl {
+	p.adv()
+	return &TypeQualifer{
+		Type: ttype,
+	}
+}
+
+func (p *Parser) parseDefaultTypeSpecifier(ttype uint) Decl {
+	p.adv()
+	return &DefaultTypeSpecifier{
+		Type: ttype,
+	}
+}
+
+func (p *Parser) parseTypeSpecifier() Decl {
+	if id := p.curr.Literal; p.types[id] {
+		p.adv()
+		return &TypeSpecifier{
+			Literal: id,
+		}
+	} else {
+		return nil
+	}
+}
+
+func (p *Parser) parseEnum() Decl {
+	enum := &Enum{}
+	p.adv()
+
+	if !p.expectid() {
+		return nil
+	} else {
+		enum.name = p.curr.Literal
+		p.adv()
+	}
+
+	if !p.expect(lex.LBRACE) {
+		return nil
+	}
+	p.adv()
+
+	for {
+		if p.expectid() {
+			enum.enums = append(enum.enums, p.curr.Literal)
+			p.adv()
+		} else {
+			return nil
+		}
+
+		if p.is(lex.COMMA) {
+			p.adv()
+		} else {
+			break
+		}
+	}
+
+	if !p.expect(lex.RBRACE) {
+		return nil
+	}
+	p.adv()
+
+	return enum
+}
+
+func (p *Parser) expectid() bool {
+	if p.curr.Type != lex.IDENT {
+		p.error("expected IDENT, got %s", toks(p.curr.Type))
+		return false
+	} else if p.types[p.curr.Literal] {
+		p.error("syntax error: using type name %s in place of identifier",
+			p.curr.Literal)
+		return false
+	} else {
+		return true
+	}
+}
 func (p *Parser) peek() uint {
 	return p.curr.Type
 }
@@ -711,14 +807,15 @@ func (p *Parser) adv() {
 func (p *Parser) expect(ttype uint) bool {
 	tok := p.curr
 	if tok.Type != ttype {
-		p.error(fmt.Sprintf("expect %s got %s",
-			lex.Tmap[ttype], lex.Tmap[tok.Type]))
+		p.error("expected %s, got %s", toks(ttype), toks(tok.Type))
 		return false
 	} else {
 		return true
 	}
 }
-
-func (p *Parser) error(msg string) {
-	p.err = append(p.err, fmt.Errorf(msg))
+func toks(ttype uint) string {
+	return lex.Tmap[ttype]
+}
+func (p *Parser) error(format string, rest ...any) {
+	p.err = append(p.err, fmt.Errorf(format, rest...))
 }
