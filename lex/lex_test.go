@@ -2,86 +2,6 @@ package lex
 
 import "testing"
 
-var tmap = map[uint]string{
-	EOF:         "EOF",
-	ERR:         "ERR",
-	AUTO:        "auto",
-	BREAK:       "break",
-	CASE:        "case",
-	CONST:       "const",
-	CONTINUE:    "continue",
-	DEFAULT:     "default",
-	DO:          "do",
-	ELSE:        "else",
-	ENUM:        "enum",
-	EXTERN:      "extern",
-	FOR:         "for",
-	GOTO:        "goto",
-	IF:          "if",
-	REGISTER:    "register",
-	RETURN:      "return",
-	SIGNED:      "signed",
-	SIZEOF:      "sizeof",
-	STATIC:      "static",
-	STRUCT:      "struct",
-	SWITCH:      "switch",
-	TYPEDEF:     "typedef",
-	UNION:       "union",
-	UNSIGNED:    "unsigned",
-	VOID:        "void",
-	VOLATILE:    "volatile",
-	WHILE:       "while",
-	LBRACKET:    "[",
-	RBRACKET:    "]",
-	LPAREN:      "(",
-	RPAREN:      ")",
-	DOT:         ".",
-	ARROW:       "->",
-	INC:         "++",
-	DEC:         "--",
-	BAND:        "&",
-	MUL:         "*",
-	ADD:         "+",
-	SUB:         "-",
-	BCOMP:       "~",
-	NOT:         "!",
-	DIV:         "/",
-	MOD:         "%",
-	LSHIFT:      "<<",
-	RSHIFT:      ">>",
-	LT:          "<",
-	GT:          ">",
-	LEQ:         "<=",
-	GEQ:         ">=",
-	EQ:          "==",
-	NEQ:         "!=",
-	BXOR:        "^",
-	AND:         "&&",
-	OR:          "||",
-	QMARK:       "?",
-	COLON:       ":",
-	ASSIGN:      "=",
-	MUL_ASSIGN:  "*=",
-	DIV_ASSIGN:  "/=",
-	MOD_ASSIGN:  "%=",
-	SUB_ASSIGN:  "-=",
-	LS_ASSIGN:   "<<=",
-	RS_ASSIGN:   ">>=",
-	BA_ASSIGN:   "&=",
-	XO_ASSIGN:   "^=",
-	BO_ASSIGN:   "|=",
-	COMMA:       ",",
-	LBRACE:      "{",
-	RBRACE:      "}",
-	SCOLON:      ";",
-	ELLIP:       "...",
-	IDENT:       "ident",
-	CHAR_CONST:  "char_const",
-	STRING:      "string",
-	INT_CONST:   "int_const",
-	FLOAT_CONST: "float_const",
-}
-
 func TestString(t *testing.T) {
 	l := New(`"test"`)
 	if l.Lex().Literal != "test" {
@@ -107,15 +27,16 @@ func TestSpaceOnly(t *testing.T) {
 	tokseq(*l, seq, t)
 }
 func TestKeywords(t *testing.T) {
-	l := New(`auto break case const continue default do
-	else enum extern for goto if register return signed 
-	sizeof static struct switch typedef union unsigned 
-	void volatile while`)
+	l := New(`auto break case char const continue default do
+	double else enum extern float for goto if int long register
+	return short signed sizeof static struct switch typedef
+	union unsigned void volatile while`)
 	seq := []uint{
-		AUTO, BREAK, CASE, CONST, CONTINUE, DEFAULT, DO,
-		ELSE, ENUM, EXTERN, FOR, GOTO, IF, REGISTER, RETURN,
-		SIGNED, SIZEOF, STATIC, STRUCT, SWITCH, TYPEDEF,
-		UNION, UNSIGNED, VOID, VOLATILE, WHILE,
+		AUTO, BREAK, CASE, CHAR, CONST, CONTINUE, DEFAULT, DO,
+		DOUBLE, ELSE, ENUM, EXTERN, FLOAT, FOR, GOTO, IF, INT,
+		LONG, REGISTER, RETURN, SHORT, SIGNED, SIZEOF, STATIC,
+		STRUCT, SWITCH, TYPEDEF, UNION, UNSIGNED, VOID, VOLATILE,
+		WHILE,
 	}
 	tokseq(*l, seq, t)
 }
@@ -170,7 +91,7 @@ func tokseq(l Lexer, seq []uint, t *testing.T) {
 		tok := l.Lex()
 		if tok.Type != ttype {
 			t.Errorf("expected tok type %s, got %s at seq[%d]",
-				tmap[ttype], tmap[tok.Type], i)
+				Tmap[ttype], Tmap[tok.Type], i)
 		}
 	}
 }

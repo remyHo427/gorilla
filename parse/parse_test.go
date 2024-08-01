@@ -10,6 +10,29 @@ type Pair struct {
 	output string
 }
 
+func TestTypeQualifer(t *testing.T) {
+	tt := []Pair{
+		{"const;", "(decl (type_qualifier const))"},
+		{"volatile;", "(decl (type_qualifier volatile))"},
+		{"const volatile;", "(decl (type_qualifier const) (type_qualifier volatile))"},
+	}
+
+	check(t, tt)
+}
+
+func TestStorageClass(t *testing.T) {
+	tt := []Pair{
+		{"typedef;", "(decl (storage_class typedef))"},
+		{"extern;", "(decl (storage_class extern))"},
+		{"static;", "(decl (storage_class static))"},
+		{"auto;", "(decl (storage_class auto))"},
+		{"register;", "(decl (storage_class register))"},
+		{"extern register;", "(decl (storage_class extern) (storage_class register))"},
+	}
+
+	check(t, tt)
+}
+
 func TestDefaultStmt(t *testing.T) {
 	tt := []Pair{
 		{"default: a;", "(default a)"},

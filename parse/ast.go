@@ -2,18 +2,24 @@ package parse
 
 import (
 	"bytes"
+	"gorilla/lex"
 	"strconv"
 )
 
 type Node interface {
 	String() string
 }
+
 type Expr interface {
 	exprNode()
 	Node
 }
 type Stmt interface {
 	stmtNode()
+	Node
+}
+type Decl interface {
+	declNode()
 	Node
 }
 
@@ -138,6 +144,43 @@ func (s *DefaultStmt) String() string {
 	return join("default", s.Stmt)
 }
 
+type DeclStmt struct {
+	Decls []Decl
+}
+
+func (s *DeclStmt) stmtNode() {}
+func (s *DeclStmt) String() string {
+	return join("decl", s.Decls)
+}
+
+// decl
+type StorageClass struct {
+	Type uint
+}
+
+func (d *StorageClass) declNode() {}
+func (d *StorageClass) String() string {
+	return join("storage_class", d.Type)
+}
+
+type TypeQualifer struct {
+	Type uint
+}
+
+func (d *TypeQualifer) declNode() {}
+func (d *TypeQualifer) String() string {
+	return join("type_qualifier", d.Type)
+}
+
+type DefaultTypeSpecifier struct {
+	Type uint
+}
+
+func (d *DefaultTypeSpecifier) declNode() {}
+func (d *DefaultTypeSpecifier) String() string {
+	return join("default_type_specifier", d.Type)
+}
+
 // expr
 type InfixExpr struct {
 	Type  uint
@@ -246,7 +289,9 @@ func join(args ...any) string {
 		case string:
 			out.WriteString(t)
 		case uint:
-			out.WriteString(tok_strmap[t])
+			out.WriteString(lex.Tmap[t])
+		case Decl:
+			out.WriteString(t.String())
 		case []Expr:
 			for i, e := range t {
 				out.WriteString(e.String())
@@ -257,6 +302,13 @@ func join(args ...any) string {
 		case []Stmt:
 			for i, s := range t {
 				out.WriteString(s.String())
+				if i < len(t)-1 {
+					out.WriteString(" ")
+				}
+			}
+		case []Decl:
+			for i, d := range t {
+				out.WriteString(d.String())
 				if i < len(t)-1 {
 					out.WriteString(" ")
 				}

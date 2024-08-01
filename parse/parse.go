@@ -137,6 +137,9 @@ func (p *Parser) parseStmt() Stmt {
 		return p.parseCaseStmt()
 	case lex.DEFAULT:
 		return p.parseDefaultStmt()
+	case lex.TYPEDEF, lex.EXTERN, lex.STATIC, lex.AUTO, lex.REGISTER,
+		lex.CONST, lex.VOLATILE:
+		return p.parseDeclStmt()
 	// case lex.IDENT:
 	// 	return p.parseDecl()
 	default:
@@ -493,6 +496,7 @@ func (p *Parser) parseExpr(currPrec uint) Expr {
 
 	return left
 }
+
 func (p *Parser) parsePrefix() Expr {
 	switch p.peek() {
 	case lex.IDENT:
@@ -518,6 +522,7 @@ func (p *Parser) parsePrefix() Expr {
 		return nil
 	}
 }
+
 func (p *Parser) parseAssign(left Expr) Expr {
 	expr := &AssignExpr{
 		Type: p.peek(),
@@ -533,6 +538,7 @@ func (p *Parser) parseAssign(left Expr) Expr {
 
 	return expr
 }
+
 func (p *Parser) parseInfixOperator(left Expr) Expr {
 	expr := &InfixExpr{
 		Type: p.peek(),
@@ -550,6 +556,7 @@ func (p *Parser) parseInfixOperator(left Expr) Expr {
 
 	return expr
 }
+
 func (p *Parser) parsePrefixOperator() Expr {
 	expr := &PrefixExpr{
 		Type: p.peek(),
@@ -564,6 +571,7 @@ func (p *Parser) parsePrefixOperator() Expr {
 
 	return expr
 }
+
 func (p *Parser) parseTernaryOperator(left Expr) Expr {
 	expr := &TernaryExpr{
 		Cond: left,
@@ -590,6 +598,7 @@ func (p *Parser) parseTernaryOperator(left Expr) Expr {
 
 	return expr
 }
+
 func (p *Parser) parsePostfixArithmetic(left Expr) Expr {
 	expr := &PostfixArithmeticExpr{
 		Type: p.peek(),
@@ -598,6 +607,7 @@ func (p *Parser) parsePostfixArithmetic(left Expr) Expr {
 
 	return expr
 }
+
 func (p *Parser) parseFunctionCall(left Expr) Expr {
 	expr := &CallExpr{
 		Callee: left,
@@ -629,6 +639,7 @@ func (p *Parser) parseFunctionCall(left Expr) Expr {
 
 	return expr
 }
+
 func (p *Parser) parseArrayIndexing(left Expr) Expr {
 	expr := &IndexExpr{
 		Arr: left,
@@ -651,10 +662,35 @@ func (p *Parser) parseArrayIndexing(left Expr) Expr {
 }
 
 // decl
-// func (p *Parser) parseDecl() Stmt {
+func (p *Parser) parseDeclStmt() Stmt {
+	stmt := &DeclStmt{}
 
-// 	return &NullStmt{}
-// }
+	decls := []Decl{}
+	for !p.is(lex.SCOLON) && !p.is(lex.EOF) {
+		switch p.peek() {
+		case lex.TYPEDEF, lex.EXTERN, lex.STATIC, lex.AUTO, lex.REGISTER:
+			decls = append(decls, &StorageClass{
+				Type: p.peek(),
+			})
+		case lex.CONST, lex.VOLATILE:
+			decls = append(decls, &TypeQualifer{
+				Type: p.peek(),
+			})
+		default:
+			return nil
+		}
+
+		p.adv()
+	}
+
+	if !p.expect(lex.SCOLON) {
+		return nil
+	}
+	p.adv()
+
+	stmt.Decls = decls
+	return stmt
+}
 
 func (p *Parser) peek() uint {
 	return p.curr.Type
@@ -676,7 +712,7 @@ func (p *Parser) expect(ttype uint) bool {
 	tok := p.curr
 	if tok.Type != ttype {
 		p.error(fmt.Sprintf("expect %s got %s",
-			tok_strmap[ttype], tok_strmap[tok.Type]))
+			lex.Tmap[ttype], lex.Tmap[tok.Type]))
 		return false
 	} else {
 		return true
