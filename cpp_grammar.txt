@@ -1,0 +1,101 @@
+1 preprocessing-file
+    = group*
+    ;
+
+2 group
+    = if-section
+    | control-line
+    | text-line
+    | '#' non-directive
+    ;
+
+3 if-section
+    = if-group elif-group* else-group? '#' "endif" '\n'
+    ;
+
+3 control-line
+    = '#' "include" pp-token+ '\n'
+    | '#' "define" IDENT pp-token* '\n'
+    | '#' "define" MACRO_BEGIN identifier-list? RPAREN pp-token* '\n'
+    | '#' "define" MACRO_BEGIN "..." RPAREN pp-token* '\n'
+    | '#' "define" MACRO_BEGIN identifier-list ',' "..." RPAREN pp-token* '\n'
+    | '#' "undef" IDENT '\n'
+    | '#" "line" pp-token+ '\n'
+    | '#' "error" pp-token* '\n'
+    | '#' "pragma" pp-token* '\n'
+    | '#' '\n'
+    ;
+
+3 text-line
+    = pp-token* '\n'
+    ;
+
+3 non-directive
+    = pp-token+ '\n'
+
+4 if-group
+    = '#' "if" constant-expression '\n' group?
+    | '#' "ifdef" IDENT '\n' group?
+    | '#' "ifndef" IDENT '\n' group?
+    ;
+
+4 elif-group
+    = '#' "elif" constant-expression '\n' group?
+    ;
+
+4 else-group
+    = '#' "else" '\n' group?
+    ;
+
+5 pp-token
+    = header-name
+    | IDENT
+    | pp-number
+    | character-constant
+    | string-literal
+    | punctuators
+    | $ any whitespace that cannot be one of above $
+    ;
+
+/*
+misc
+    header-name             '<' [^\n\>]* '>'
+    IDENT                   ALPHA ALNUM*
+    pp-number               (DIGIT | ('.' DIGIT)) (ALNUM | [weEpP.+-])*
+    character-constant      \' ([^\'\n\\] | ESCAPE)* \'
+    string-literal          \" ([^\"\n\\] | ESCAPE)* \"
+    
+punctuators
+    [ ] ( ) { } . -> / ++ -- & * + - ~ ! % << >> < > <= >= == !=
+    ^ | && || ? : ; ... = *= /= %= += -= <<= >>= &= ^= |= , #, 
+    ## <: :> <% %> %: %:%:
+
+keywords
+    define
+    elif
+    else
+    error
+    if
+    ifdef
+    ifndef
+    include
+    line
+    pragma
+    undef
+
+character sets:
+    ALPHA           [a-zA-Z_]
+    DIGIT           [0-9]
+    ALNUM           ALPHA | DIGIT
+    ESCAPE          '\' (SIMPLE | OCTAL | HEXA)
+    SIMPLE          [\'\"\?\a\b\f\n\r\t\v\\]
+    OCTAL           OCT{1,3}
+    OCT             [0-7]
+    HEXA             "\x" HEX+
+    HEX             [0-9a-fA-F]
+*/
+
+
+
+
+

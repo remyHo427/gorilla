@@ -1,0 +1,80 @@
+package cpp
+
+const (
+	EOF = iota
+	ERR
+	// keywords
+	DEFINE
+	ELIF
+	ELSE
+	ERROR
+	IF
+	IFDEF
+	IFNDEF
+	INCLUDE
+	LINE
+	PRAGMA
+	UNDEF
+	// literal
+	HEADER
+	IDENT
+	PPNUM
+	CHAR_CONST
+	STRING
+	// pp misc
+	HASH
+	NEWLINE
+	NON_NEWLINE_WS
+	// punctuators
+	LBRACKET
+	RBRACKET
+	LPAREN
+	RPAREN
+	DOT
+	ARROW
+	INC
+	DEC
+	BAND
+	MUL
+	ADD
+	SUB
+	BCOMP
+	NOT
+	DIV
+	MOD
+	LSHIFT
+	RSHIFT
+	LT
+	GT
+	LEQ
+	GEQ
+	EQ
+	NEQ
+	BXOR
+	BOR
+	AND
+	OR
+	QMARK
+	COLON
+	ASSIGN
+	MUL_ASSIGN
+	DIV_ASSIGN
+	MOD_ASSIGN
+	ADD_ASSIGN
+	SUB_ASSIGN
+	LS_ASSIGN
+	RS_ASSIGN
+	BA_ASSIGN
+	XO_ASSIGN
+	BO_ASSIGN
+	COMMA
+	LBRACE
+	RBRACE
+	SCOLON
+	ELLIP
+)
+
+type Token struct {
+	Type    uint
+	Literal string
+}
