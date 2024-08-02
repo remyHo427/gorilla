@@ -18,7 +18,7 @@ func pre(input string) string {
 	return strip(splice(trigraph(input)))
 }
 
-// replace trigraph and splice lines
+// phase 1: replace all trigraphs
 func trigraph(input string) string {
 	var out bytes.Buffer
 	l := len(input)
@@ -59,6 +59,7 @@ func trigraph(input string) string {
 	return out.String()
 }
 
+// phase 2: backslashes immediately followed by newlines are removed
 func splice(input string) string {
 	var out bytes.Buffer
 	l := len(input)
@@ -89,6 +90,7 @@ func splice(input string) string {
 	return out.String()
 }
 
+// phase 3.1: comments are replaced with one space
 func strip(input string) string {
 	var out bytes.Buffer
 	l := len(input)
@@ -163,48 +165,4 @@ func strip(input string) string {
 	}
 
 	return out.String()
-	// var out bytes.Buffer
-	// l := len(input)
-
-	// for i := 0; i < l; i++ {
-	// 	c := input[i]
-
-	// 	if c == '/' {
-	// 		if i+1 >= l {
-	// 			out.WriteByte(c)
-	// 			continue
-	// 		}
-
-	// 		i++
-	// 		nc := input[i]
-	// 		if nc == '/' {
-	// 			i++
-	// 			for read := i; read < l; i++ {
-	// 				if input[read] == '\n' {
-	// 					out.WriteByte(' ')
-	// 					break
-	// 				}
-	// 			}
-	// 			out.WriteByte(' ')
-	// 			continue
-	// 		} else if nc == '*' {
-	// 			i++
-	// 			for read := i; read < l; i++ {
-	// 				if input[read] == '*' && read+1 < l && input[read+1] == '/' {
-	// 					i++
-	// 					out.WriteByte(' ')
-	// 					break
-	// 				}
-	// 			}
-	// 			continue
-	// 		}
-
-	// 		out.WriteByte(c)
-	// 		out.WriteByte(nc)
-	// 	}
-
-	// 	out.WriteByte(c)
-	// }
-
-	// return out.String()
 }

@@ -66,6 +66,10 @@ misc
     string-literal          \" ([^\"\n\\] | ESCAPE)* \"
     
 punctuators
+    significant
+    ... ) #
+
+    insignificant
     [ ] ( ) { } . -> / ++ -- & * + - ~ ! % << >> < > <= >= == !=
     ^ | && || ? : ; ... = *= /= %= += -= <<= >>= &= ^= |= , #, 
     ## <: :> <% %> %: %:%:

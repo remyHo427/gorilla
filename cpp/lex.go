@@ -5,74 +5,44 @@ import (
 	"unicode"
 )
 
-var kw_map = map[string]uint{}
+var kw_map = map[string]uint{
+	"define":  DEFINE,
+	"elif":    ELIF,
+	"else":    ELSE,
+	"error":   ERROR,
+	"if":      IF,
+	"ifdef":   IFDEF,
+	"ifndef":  IFNDEF,
+	"include": INCLUDE,
+	"line":    LINE,
+	"pragma":  PRAGMA,
+	"undef":   UNDEF,
+}
+
 var Tmap = map[uint]string{
-	EOF:            "EOF",
-	DEFINE:         "define",
-	ELIF:           "elif",
-	ELSE:           "else",
-	ERROR:          "error",
-	IF:             "if",
-	IFDEF:          "ifdef",
-	IFNDEF:         "ifndef",
-	INCLUDE:        "include",
-	LINE:           "line",
-	PRAGMA:         "pragma",
-	UNDEF:          "undef",
-	HEADER:         "HEADER",
-	PPNUM:          "PPNUM",
-	HASH:           "#",
-	NEWLINE:        `\n`,
-	NON_NEWLINE_WS: "NON_NEWLINE_WS",
-	LBRACKET:       "[",
-	RBRACKET:       "]",
-	LPAREN:         "(",
-	RPAREN:         ")",
-	DOT:            ".",
-	ARROW:          "->",
-	INC:            "++",
-	DEC:            "--",
-	BAND:           "&",
-	MUL:            "*",
-	ADD:            "+",
-	SUB:            "-",
-	BCOMP:          "~",
-	NOT:            "!",
-	DIV:            "/",
-	MOD:            "%",
-	LSHIFT:         "<<",
-	RSHIFT:         ">>",
-	LT:             "<",
-	GT:             ">",
-	LEQ:            "<=",
-	GEQ:            ">=",
-	EQ:             "==",
-	NEQ:            "!=",
-	BXOR:           "^",
-	BOR:            "|",
-	AND:            "&&",
-	OR:             "||",
-	QMARK:          "?",
-	COLON:          ":",
-	ASSIGN:         "=",
-	MUL_ASSIGN:     "*=",
-	DIV_ASSIGN:     "/=",
-	MOD_ASSIGN:     "%=",
-	ADD_ASSIGN:     "+=",
-	SUB_ASSIGN:     "-=",
-	LS_ASSIGN:      "<<=",
-	RS_ASSIGN:      ">>=",
-	BA_ASSIGN:      "&=",
-	XO_ASSIGN:      "^=",
-	BO_ASSIGN:      "|=",
-	COMMA:          ",",
-	LBRACE:         "{",
-	RBRACE:         "}",
-	SCOLON:         ";",
-	ELLIP:          "...",
-	IDENT:          "ident",
-	CHAR_CONST:     "char_const",
-	STRING:         "string",
+	EOF:        "EOF",
+	DEFINE:     "define",
+	ELIF:       "elif",
+	ELSE:       "else",
+	ERROR:      "error",
+	IF:         "if",
+	IFDEF:      "ifdef",
+	IFNDEF:     "ifndef",
+	INCLUDE:    "include",
+	LINE:       "line",
+	PRAGMA:     "pragma",
+	UNDEF:      "undef",
+	HEADER:     "HEADER",
+	PPNUM:      "PPNUM",
+	HASH:       "#",
+	NEWLINE:    `\n`,
+	WS:         "WS",
+	COMMA:      ",",
+	PUNCT:      "PUNCT",
+	ELLIP:      "...",
+	IDENT:      "ident",
+	CHAR_CONST: "char_const",
+	STRING:     "string",
 }
 
 type Lexer struct {
@@ -90,120 +60,101 @@ func (l *Lexer) Lex() Token {
 	for !l.isend() {
 		c := l.peek()
 
+		if unicode.IsLetter(c) {
+			return l.word()
+		}
+
 		var ttype uint
 		switch c {
-		case '\t', '\r', '\v', '\f', ' ':
-			l.adv()
-			return tok(NON_NEWLINE_WS)
+		// phase 3.3: newlines are kept
 		case '\n':
 			l.adv()
 			return tok(NEWLINE)
-		case '?':
+		case '#':
 			l.adv()
-			return tok(QMARK)
-		case ';':
-			l.adv()
-			return tok(SCOLON)
-		case ':':
-			l.adv()
-			return tok(COLON)
-		case '{':
-			l.adv()
-			return tok(LBRACE)
-		case '}':
-			l.adv()
-			return tok(RBRACE)
-		case '(':
-			l.adv()
-			return tok(LPAREN)
-		case ')':
-			l.adv()
-			return tok(RPAREN)
-		case '[':
-			l.adv()
-			return tok(LBRACKET)
-		case ']':
-			l.adv()
-			return tok(RBRACKET)
+			return tok(HASH)
 		case ',':
 			l.adv()
 			return tok(COMMA)
-		case '~':
+		case ')':
 			l.adv()
-			return tok(BCOMP)
+			return tok(RPAREN)
 		case '.':
 			l.adv()
 			ttype = l.match("..", ELLIP, ttype)
-			ttype = l.match("", DOT, ttype)
+			ttype = l.match("", PUNCT, ttype)
 			return tok(ttype)
+		case '?', ';', ':', '{', '}', '(', '[', ']', '~':
+			l.adv()
+			return tok(PUNCT)
 		case '+':
 			l.adv()
-			ttype = l.match("+", INC, ttype)
-			ttype = l.match("=", ADD_ASSIGN, ttype)
-			ttype = l.match("", ADD, ttype)
+			ttype = l.match("+", PUNCT, ttype)
+			ttype = l.match("=", PUNCT, ttype)
+			ttype = l.match("", PUNCT, ttype)
 			return tok(ttype)
 		case '-':
 			l.adv()
-			ttype = l.match("-", DEC, ttype)
-			ttype = l.match("=", SUB_ASSIGN, ttype)
-			ttype = l.match(">", ARROW, ttype)
-			ttype = l.match("", SUB, ttype)
+			ttype = l.match("-", PUNCT, ttype)
+			ttype = l.match("=", PUNCT, ttype)
+			ttype = l.match(">", PUNCT, ttype)
+			ttype = l.match("", PUNCT, ttype)
 			return tok(ttype)
 		case '*':
 			l.adv()
-			ttype = l.match("=", MUL_ASSIGN, ttype)
-			ttype = l.match("", MUL, ttype)
+			ttype = l.match("=", PUNCT, ttype)
+			ttype = l.match("", PUNCT, ttype)
 			return tok(ttype)
 		case '%':
 			l.adv()
-			ttype = l.match("=", MOD_ASSIGN, ttype)
-			ttype = l.match("", MOD, ttype)
+			ttype = l.match("=", PUNCT, ttype)
+			ttype = l.match("", PUNCT, ttype)
 			return tok(ttype)
 		case '/':
 			l.adv()
-			ttype = l.match("=", DIV_ASSIGN, ttype)
-			ttype = l.match("", DIV, ttype)
+			ttype = l.match("=", PUNCT, ttype)
+			ttype = l.match("", PUNCT, ttype)
 			return tok(ttype)
 		case '<':
 			l.adv()
-			ttype = l.match("<=", LS_ASSIGN, ttype)
-			ttype = l.match("<", LSHIFT, ttype)
-			ttype = l.match("=", LEQ, ttype)
-			ttype = l.match("", LT, ttype)
+			ttype = l.match("<=", PUNCT, ttype)
+			ttype = l.match("<", PUNCT, ttype)
+			ttype = l.match("=", PUNCT, ttype)
+			ttype = l.match("", PUNCT, ttype)
 			return tok(ttype)
 		case '>':
 			l.adv()
-			ttype = l.match(">=", RS_ASSIGN, ttype)
-			ttype = l.match(">", RSHIFT, ttype)
-			ttype = l.match("=", GEQ, ttype)
-			ttype = l.match("", GT, ttype)
+			ttype = l.match(">=", PUNCT, ttype)
+			ttype = l.match(">", PUNCT, ttype)
+			ttype = l.match("=", PUNCT, ttype)
+			ttype = l.match("", PUNCT, ttype)
 			return tok(ttype)
 		case '&':
 			l.adv()
-			ttype = l.match("&", AND, ttype)
-			ttype = l.match("=", BA_ASSIGN, ttype)
-			ttype = l.match("", BAND, ttype)
+			ttype = l.match("&", PUNCT, ttype)
+			ttype = l.match("=", PUNCT, ttype)
+			ttype = l.match("", PUNCT, ttype)
 			return tok(ttype)
 		case '|':
 			l.adv()
-			ttype = l.match("|", OR, ttype)
-			ttype = l.match("=", BO_ASSIGN, ttype)
-			ttype = l.match("", BOR, ttype)
+			ttype = l.match("|", PUNCT, ttype)
+			ttype = l.match("=", PUNCT, ttype)
+			ttype = l.match("", PUNCT, ttype)
 			return tok(ttype)
 		case '^':
 			l.adv()
-			ttype = l.match("=", XO_ASSIGN, ttype)
-			ttype = l.match("", BXOR, ttype)
+			ttype = l.match("=", PUNCT, ttype)
+			ttype = l.match("", PUNCT, ttype)
 			return tok(ttype)
 		case '!':
 			l.adv()
-			ttype = l.match("=", NEQ, ttype)
-			ttype = l.match("", NOT, ttype)
+			ttype = l.match("=", PUNCT, ttype)
+			ttype = l.match("", PUNCT, ttype)
 			return tok(ttype)
 		case '=':
 			l.adv()
-			ttype = l.match("=", EQ, ttype)
-			ttype = l.match("", ASSIGN, ttype)
+			ttype = l.match("=", PUNCT, ttype)
+			ttype = l.match("", PUNCT, ttype)
 			return tok(ttype)
 		case '_':
 			return l.word()
@@ -211,15 +162,30 @@ func (l *Lexer) Lex() Token {
 			return l.string()
 
 		default:
-			l.adv()
-			return Token{
-				Type:    ERR,
-				Literal: fmt.Sprintf("unknown character %q", c),
+			// phase 3.2: non newline ws are collapsed into one space character
+			if unicode.IsSpace(c) {
+				l.group_ws()
+				return tok(WS)
+			} else {
+				l.adv()
+				return Token{
+					Type:    ERR,
+					Literal: fmt.Sprintf("unknown character %q", c),
+				}
 			}
 		}
 	}
 
 	return tok(EOF)
+}
+
+func (l *Lexer) group_ws() {
+	for {
+		l.adv()
+		if c := l.peek(); !unicode.IsSpace(c) || c == '\n' {
+			break
+		}
+	}
 }
 
 func (l *Lexer) string() Token {
@@ -266,9 +232,8 @@ func (l *Lexer) word() Token {
 	end := l.sp
 
 	s := string(l.src[start:end])
-	kword := l.keyword[s]
 
-	if kword != 0 {
+	if kword, ok := l.keyword[s]; ok {
 		return tok(kword)
 	} else {
 		return Token{
@@ -296,9 +261,6 @@ func (l *Lexer) match(s string, ttype uint, curr uint) uint {
 }
 func (l *Lexer) peek() rune {
 	return l.src[l.sp]
-}
-func (l *Lexer) peekn() rune {
-	return l.src[l.sp+1]
 }
 func (l *Lexer) adv() {
 	l.sp++
