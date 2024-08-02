@@ -218,16 +218,9 @@ func (l *Lexer) Lex() Token {
 			return tok(ttype)
 		case '/':
 			l.adv()
-			if l.isend() {
-				return tok(DIV)
-			} else if c := l.peek(); c == '/' || c == '*' {
-				l.skip_comment()
-				continue
-			} else {
-				ttype = l.match("=", DIV_ASSIGN, ttype)
-				ttype = l.match("", DIV, ttype)
-				return tok(ttype)
-			}
+			ttype = l.match("=", DIV_ASSIGN, ttype)
+			ttype = l.match("", DIV, ttype)
+			return tok(ttype)
 		case '<':
 			l.adv()
 			ttype = l.match("<=", LS_ASSIGN, ttype)

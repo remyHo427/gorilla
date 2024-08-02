@@ -71,20 +71,6 @@ func TestOperators(t *testing.T) {
 	}
 	tokseq(*l, seq, t)
 }
-func TestComment(t *testing.T) {
-	l := New(`
-		// a
-		// // a
-		/*
-		b
-		*/
-		c
-	`)
-	seq := []uint{
-		IDENT, EOF,
-	}
-	tokseq(*l, seq, t)
-}
 
 func tokseq(l Lexer, seq []uint, t *testing.T) {
 	for i, ttype := range seq {
