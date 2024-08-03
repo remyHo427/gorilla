@@ -64,98 +64,114 @@ func (l *Lexer) Lex() Token {
 			return l.word()
 		}
 
-		var ttype uint
 		switch c {
 		// phase 3.3: newlines are kept
 		case '\n':
 			l.adv()
-			return tok(NEWLINE)
+			return tok(NEWLINE, "\n")
 		case '#':
 			l.adv()
-			return tok(HASH)
+			return tok(HASH, "#")
 		case ',':
 			l.adv()
-			return tok(COMMA)
+			return tok(COMMA, ",")
 		case ')':
 			l.adv()
-			return tok(RPAREN)
+			return tok(RPAREN, "(")
 		case '.':
-			l.adv()
-			ttype = l.match("..", ELLIP, ttype)
-			ttype = l.match("", PUNCT, ttype)
-			return tok(ttype)
+			if p, matched := l.oneOf("..."); matched {
+				return tok(ELLIP, p)
+			} else {
+				l.adv()
+				return tok(PUNCT, ".")
+			}
 		case '?', ';', ':', '{', '}', '(', '[', ']', '~':
 			l.adv()
-			return tok(PUNCT)
+			return tok(PUNCT, string(c))
 		case '+':
-			l.adv()
-			ttype = l.match("+", PUNCT, ttype)
-			ttype = l.match("=", PUNCT, ttype)
-			ttype = l.match("", PUNCT, ttype)
-			return tok(ttype)
+			if p, matched := l.oneOf("++", "+="); matched {
+				return tok(PUNCT, p)
+			} else {
+				l.adv()
+				return tok(PUNCT, "+")
+			}
 		case '-':
-			l.adv()
-			ttype = l.match("-", PUNCT, ttype)
-			ttype = l.match("=", PUNCT, ttype)
-			ttype = l.match(">", PUNCT, ttype)
-			ttype = l.match("", PUNCT, ttype)
-			return tok(ttype)
+			if p, matched := l.oneOf("--", "-=", "->"); matched {
+				return tok(PUNCT, p)
+			} else {
+				l.adv()
+				return tok(PUNCT, "-")
+			}
 		case '*':
-			l.adv()
-			ttype = l.match("=", PUNCT, ttype)
-			ttype = l.match("", PUNCT, ttype)
-			return tok(ttype)
+			if p, matched := l.oneOf("*="); matched {
+				return tok(PUNCT, p)
+			} else {
+				l.adv()
+				return tok(PUNCT, "*")
+			}
 		case '%':
-			l.adv()
-			ttype = l.match("=", PUNCT, ttype)
-			ttype = l.match("", PUNCT, ttype)
-			return tok(ttype)
+			if p, matched := l.oneOf("%="); matched {
+				return tok(PUNCT, p)
+			} else {
+				l.adv()
+				return tok(PUNCT, "%")
+			}
 		case '/':
-			l.adv()
-			ttype = l.match("=", PUNCT, ttype)
-			ttype = l.match("", PUNCT, ttype)
-			return tok(ttype)
+			if p, matched := l.oneOf("/="); matched {
+				return tok(PUNCT, p)
+			} else {
+				l.adv()
+				return tok(PUNCT, "/")
+			}
 		case '<':
-			l.adv()
-			ttype = l.match("<=", PUNCT, ttype)
-			ttype = l.match("<", PUNCT, ttype)
-			ttype = l.match("=", PUNCT, ttype)
-			ttype = l.match("", PUNCT, ttype)
-			return tok(ttype)
+			if p, matched := l.oneOf("<<=", "<<", "<="); matched {
+				return tok(PUNCT, p)
+			} else {
+				l.adv()
+				return tok(PUNCT, "<")
+			}
 		case '>':
-			l.adv()
-			ttype = l.match(">=", PUNCT, ttype)
-			ttype = l.match(">", PUNCT, ttype)
-			ttype = l.match("=", PUNCT, ttype)
-			ttype = l.match("", PUNCT, ttype)
-			return tok(ttype)
+			if p, matched := l.oneOf(">>=", ">>", ">="); matched {
+				return tok(PUNCT, p)
+			} else {
+				l.adv()
+				return tok(PUNCT, ">")
+			}
 		case '&':
-			l.adv()
-			ttype = l.match("&", PUNCT, ttype)
-			ttype = l.match("=", PUNCT, ttype)
-			ttype = l.match("", PUNCT, ttype)
-			return tok(ttype)
+			if p, matched := l.oneOf("&=", "&&"); matched {
+				return tok(PUNCT, p)
+			} else {
+				l.adv()
+				return tok(PUNCT, "&")
+			}
 		case '|':
-			l.adv()
-			ttype = l.match("|", PUNCT, ttype)
-			ttype = l.match("=", PUNCT, ttype)
-			ttype = l.match("", PUNCT, ttype)
-			return tok(ttype)
+			if p, matched := l.oneOf("|=", "||"); matched {
+				return tok(PUNCT, p)
+			} else {
+				l.adv()
+				return tok(PUNCT, "|")
+			}
 		case '^':
-			l.adv()
-			ttype = l.match("=", PUNCT, ttype)
-			ttype = l.match("", PUNCT, ttype)
-			return tok(ttype)
+			if p, matched := l.oneOf("^="); matched {
+				return tok(PUNCT, p)
+			} else {
+				l.adv()
+				return tok(PUNCT, "^")
+			}
 		case '!':
-			l.adv()
-			ttype = l.match("=", PUNCT, ttype)
-			ttype = l.match("", PUNCT, ttype)
-			return tok(ttype)
+			if p, matched := l.oneOf("!="); matched {
+				return tok(PUNCT, p)
+			} else {
+				l.adv()
+				return tok(PUNCT, "!")
+			}
 		case '=':
-			l.adv()
-			ttype = l.match("=", PUNCT, ttype)
-			ttype = l.match("", PUNCT, ttype)
-			return tok(ttype)
+			if p, matched := l.oneOf("=="); matched {
+				return tok(PUNCT, p)
+			} else {
+				l.adv()
+				return tok(PUNCT, "=")
+			}
 		case '_':
 			return l.word()
 		case '"':
@@ -164,8 +180,7 @@ func (l *Lexer) Lex() Token {
 		default:
 			// phase 3.2: non newline ws are collapsed into one space character
 			if unicode.IsSpace(c) {
-				l.group_ws()
-				return tok(WS)
+				return tok(WS, l.group_ws())
 			} else {
 				l.adv()
 				return Token{
@@ -176,16 +191,23 @@ func (l *Lexer) Lex() Token {
 		}
 	}
 
-	return tok(EOF)
+	return tok(EOF, "")
 }
 
-func (l *Lexer) group_ws() {
+func (l *Lexer) group_ws() string {
+	start := l.sp
+
 	for {
 		l.adv()
-		if c := l.peek(); !unicode.IsSpace(c) || c == '\n' {
+		if l.isend() {
+			break
+		} else if c := l.peek(); !unicode.IsSpace(c) || c == '\n' {
 			break
 		}
 	}
+
+	end := l.sp
+	return string(l.src[start:end])
 }
 
 func (l *Lexer) string() Token {
@@ -234,7 +256,7 @@ func (l *Lexer) word() Token {
 	s := string(l.src[start:end])
 
 	if kword, ok := l.keyword[s]; ok {
-		return tok(kword)
+		return tok(kword, s)
 	} else {
 		return Token{
 			Type:    IDENT,
@@ -242,22 +264,31 @@ func (l *Lexer) word() Token {
 		}
 	}
 }
-func (l *Lexer) match(s string, ttype uint, curr uint) uint {
-	if curr != EOF {
-		return curr
-	}
-
+func (l *Lexer) oneOf(patterns ...string) (string, bool) {
 	start := l.sp
-	for _, c := range s {
-		if l.isend() || l.peek() != rune(c) {
-			l.sp = start
-			return EOF
-		} else {
-			l.adv()
+
+	for _, p := range patterns {
+		l.sp = start
+		i := 0
+
+		for i < len(p) {
+			if l.isend() {
+				return "", false
+			} else if rune(p[i]) != l.peek() {
+				break
+			} else {
+				l.adv()
+				i++
+			}
+		}
+
+		if i >= len(p) {
+			return p, true
 		}
 	}
 
-	return ttype
+	l.sp = start
+	return "", false
 }
 func (l *Lexer) peek() rune {
 	return l.src[l.sp]
@@ -269,6 +300,6 @@ func (l *Lexer) isend() bool {
 	return l.sp >= len(l.src)
 }
 
-func tok(ttype uint) Token {
-	return Token{Type: ttype, Literal: ""}
+func tok(ttype uint, s string) Token {
+	return Token{Type: ttype, Literal: s}
 }
