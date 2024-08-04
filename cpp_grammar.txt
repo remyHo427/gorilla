@@ -5,8 +5,8 @@
 2 group
     = if-section
     | control-line
-    | text-line
     | '#' non-directive
+    | text-line
     ;
 
 3 if-section

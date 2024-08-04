@@ -26,8 +26,22 @@ func (p *Parser) Expand() (string, []error) {
 	var out bytes.Buffer
 
 	for !p.is(EOF) {
-		out.WriteString(p.curr.Literal)
+		if !p.is(HASH) {
+			out.WriteString(p.preserveRest())
+			continue
+		}
 		p.adv()
+
+		switch p.curr.Type {
+		case NEWLINE:
+			p.adv()
+			out.WriteString("\n")
+		case DEFINE:
+			p.adv()
+			p.define()
+		default:
+			out.WriteString(p.preserveRest())
+		}
 	}
 
 	if len(p.err) != 0 {
@@ -37,6 +51,25 @@ func (p *Parser) Expand() (string, []error) {
 	}
 }
 
+func (p *Parser) define() {
+	switch p.curr.Type {
+	case IDENT:
+		p.defineSimpleMacro(p.curr.Literal)
+	}
+}
+func (p *Parser) defineSimpleMacro(name string) string {
+	return ""
+}
+func (p *Parser) preserveRest() string {
+	var out bytes.Buffer
+
+	for !p.is(EOF) && !p.is(NEWLINE) {
+		out.WriteString(p.curr.Literal)
+		p.adv()
+	}
+
+	return out.String()
+}
 func (p *Parser) peek() uint {
 	return p.curr.Type
 }
