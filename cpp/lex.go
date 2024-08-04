@@ -62,6 +62,9 @@ func (l *Lexer) Lex() Token {
 
 		if unicode.IsLetter(c) {
 			return l.word()
+		} else if unicode.IsDigit(c) {
+			l.adv()
+			return l.ppnum(false)
 		}
 
 		switch c {
@@ -77,13 +80,17 @@ func (l *Lexer) Lex() Token {
 			return tok(COMMA, ",")
 		case ')':
 			l.adv()
-			return tok(RPAREN, "(")
+			return tok(RPAREN, ")")
 		case '.':
 			if p, matched := l.oneOf("..."); matched {
 				return tok(ELLIP, p)
+			}
+			l.adv()
+			if l.isend() || !unicode.IsDigit(l.peek()) {
+				return tok(PUNCT, ".")
 			} else {
 				l.adv()
-				return tok(PUNCT, ".")
+				return l.ppnum(true)
 			}
 		case '?', ';', ':', '{', '}', '(', '[', ']', '~':
 			l.adv()
@@ -180,7 +187,8 @@ func (l *Lexer) Lex() Token {
 		default:
 			// phase 3.2: non newline ws are collapsed into one space character
 			if unicode.IsSpace(c) {
-				return tok(WS, l.group_ws())
+				l.group_ws()
+				return tok(WS, " ")
 			} else {
 				l.adv()
 				return Token{
@@ -194,9 +202,35 @@ func (l *Lexer) Lex() Token {
 	return tok(EOF, "")
 }
 
-func (l *Lexer) group_ws() string {
-	start := l.sp
+func (l *Lexer) ppnum(dot_beginning bool) Token {
+	var start int
 
+	if dot_beginning {
+		start = l.sp - 2
+	} else {
+		start = l.sp - 1
+	}
+
+	for !l.isend() {
+		switch c := l.peek(); c {
+		case 'w', 'e', 'E', 'p', 'P', '.', '+', '-':
+			l.adv()
+			continue
+		default:
+			if unicode.IsDigit(c) || unicode.IsLetter(c) {
+				l.adv()
+				continue
+			}
+		}
+		break
+	}
+
+	end := l.sp
+
+	return tok(PPNUM, string(l.src[start:end]))
+}
+
+func (l *Lexer) group_ws() {
 	for {
 		l.adv()
 		if l.isend() {
@@ -205,9 +239,6 @@ func (l *Lexer) group_ws() string {
 			break
 		}
 	}
-
-	end := l.sp
-	return string(l.src[start:end])
 }
 
 func (l *Lexer) string() Token {

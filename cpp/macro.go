@@ -26,14 +26,8 @@ func (p *Parser) Expand() (string, []error) {
 	var out bytes.Buffer
 
 	for !p.is(EOF) {
-		if s, ok := p.parseGroup(); !ok {
-			for !p.is(NEWLINE) && !p.is(EOF) {
-				p.adv()
-			}
-			p.adv()
-		} else {
-			out.WriteString(s)
-		}
+		out.WriteString(p.curr.Literal)
+		p.adv()
 	}
 
 	if len(p.err) != 0 {
@@ -41,24 +35,6 @@ func (p *Parser) Expand() (string, []error) {
 	} else {
 		return out.String(), nil
 	}
-}
-
-func (p *Parser) parseGroup() (string, bool) {
-	if !p.is(HASH) {
-		p.adv()
-		return p.parseTextline()
-	}
-
-	return "", true
-}
-
-func (p *Parser) parseTextline() (string, bool) {
-	var out bytes.Buffer
-
-	for !p.is(NEWLINE) {
-	}
-
-	return out.String(), true
 }
 
 func (p *Parser) peek() uint {

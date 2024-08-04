@@ -2,6 +2,14 @@ package cpp
 
 import "testing"
 
+func TestPpnum(t *testing.T) {
+	l := New("0 1 .1 0.1 0.1f 1 1 100ul .1ab.+-..-+")
+	seq := []uint{PPNUM, WS, PPNUM, WS, PPNUM, WS, PPNUM,
+		WS, PPNUM, WS, PPNUM, WS, PPNUM, WS, PPNUM, WS, PPNUM, EOF}
+
+	tokseq(*l, seq, t)
+}
+
 func TestNewline(t *testing.T) {
 	l := New("\n\n\n")
 	seq := []uint{NEWLINE, NEWLINE, NEWLINE, EOF}
